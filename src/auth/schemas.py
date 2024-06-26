@@ -1,8 +1,8 @@
+
+from typing import Union
 from datetime import date, datetime
 
 from fastapi_users import schemas, models
-
-
 
 
 class UserRead(schemas.BaseUser[int]):
@@ -16,7 +16,7 @@ class UserRead(schemas.BaseUser[int]):
     total_withdrawn: int
     total_withdrawals: int
     created_at: date
-    # favorite_game_id: int
+    favorite_game_id: Union[int, None]
 
 class UserCreate(schemas.BaseUserCreate):
     username: str

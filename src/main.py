@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from src.auth.auth import fastapi_users, auth_backend, current_user
 from src.auth.schemas import UserRead, UserCreate
 from src.auth.models import create_db_and_tables
-
+from src.games.routers import router as games_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,3 +31,5 @@ app.include_router(
     prefix="/auth",
     tags=["auth"],
 )
+
+app.include_router(games_router)
