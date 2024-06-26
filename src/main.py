@@ -5,16 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.auth.auth import fastapi_users, auth_backend, current_user
 from src.auth.schemas import UserRead, UserCreate
-from src.auth.models import create_db_and_tables
 from src.games.routers import router as games_router
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Not needed if you setup a migration system like Alembic
-    await create_db_and_tables()
-    yield
+# from src.auth.models import create_db_and_tables
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # Not needed if you setup a migration system like Alembic
+#     await create_db_and_tables()
+#     yield
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 origins = [
     "http://localhost",
