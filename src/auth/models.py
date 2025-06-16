@@ -12,7 +12,7 @@ from src.database import Base, async_engine
 
 class Game(Base):
     __tablename__="games"
-    id: Mapped[str] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     photo: Mapped[str] = mapped_column(String, server_default="/defaultGamePic.png") #???
     game_type: Mapped[str] = mapped_column(String, nullable=False,)
@@ -25,7 +25,7 @@ class Tag(Base):
     __tablename__ = "tags"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, unique=True)
-    game_id: Mapped[list["Game"]] = relationship(secondary="game_tags", back_populates="tags")
+    games: Mapped[list["Game"]] = relationship(secondary="game_tags", back_populates="tags")
 
 #we need this model for realization of principe ManyToMany. It contains pairs game-tag
 class GameTag(Base): 
