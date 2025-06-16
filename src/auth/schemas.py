@@ -15,7 +15,7 @@ class UserRead(schemas.BaseUser[int]):
     total_deposit: int
     total_withdrawn: int
     total_withdrawals: int
-    created_at: date
+    created_at: datetime
     favorite_game_id: Union[int, None]
 
 class UserCreate(schemas.BaseUserCreate):
@@ -23,8 +23,8 @@ class UserCreate(schemas.BaseUserCreate):
     email: str
     phone_number: str
     password: str
-    created_at: date = datetime.utcnow
-
+    created_at: datetime = datetime.utcnow
+    
 
 class UserUpdate(schemas.BaseUserUpdate):
     pass

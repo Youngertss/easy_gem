@@ -40,7 +40,7 @@ async def db_get_all_games(session: AsyncSession):
     
     except Exception as e:
         await session.rollback()
-        raise HTTPException(status_code=404, detail=f"Can't get the game: {e}")
+        raise HTTPException(status_code=404, detail=f"Can't get games: {e}")
     
 async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSession):
     try:

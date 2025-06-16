@@ -13,8 +13,9 @@ from src.database import Base, async_engine
 class Game(Base):
     __tablename__="games"
     id: Mapped[str] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id: Mapped[str] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    id: Mapped[str] = mapped_column(Integer, primary_key=True) #delete this
+    name: Mapped[str] = mapped_column(String, nullable=False)  #must be unique
+    # photo for game!
     game_type: Mapped[str] = mapped_column(String)
     data: Mapped[JSON] = mapped_column(JSON, nullable=False)
     created_at: Mapped[str] = mapped_column(TIMESTAMP, default=datetime.utcnow, nullable=False)
@@ -22,12 +23,12 @@ class Game(Base):
 class User(Base, SQLAlchemyBaseUserTable[int]):
     __tablename__ = "users"
     id: Mapped[str] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    username: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False) #unique
+    email: Mapped[str] = mapped_column(String, nullable=False) #unique
     hashed_password: Mapped[str] = mapped_column(
         String(length=1024), nullable=False
     )
-    phone_number: Mapped[str] = mapped_column(String, nullable=True)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True) #поставить деф значене, чтобы можно было не вводить
     photo: Mapped[int] = mapped_column(Integer, default=1)
     balance: Mapped[int] = mapped_column(Integer, default= 0)
     total_deposit: Mapped[int] = mapped_column(Integer, default=0)
