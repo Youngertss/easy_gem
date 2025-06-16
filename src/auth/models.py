@@ -1,44 +1,59 @@
-
 from datetime import datetime, date
-from typing import Union
+from typing import Union, Any
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import Boolean, String, Integer, TIMESTAMP, ForeignKey, Boolean, JSON
+from sqlalchemy import Boolean, String, Integer, TIMESTAMP, ForeignKey, Boolean, JSON, text
 
 from src.database import Base, async_engine
 # from src.games.models import Game, GameHistory
+
 class Game(Base):
     __tablename__="games"
     id: Mapped[str] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id: Mapped[str] = mapped_column(Integer, primary_key=True) #delete this
-    name: Mapped[str] = mapped_column(String, nullable=False)  #must be unique
-    # photo for game!
-    game_type: Mapped[str] = mapped_column(String)
-    data: Mapped[JSON] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[str] = mapped_column(TIMESTAMP, default=datetime.utcnow, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    photo: Mapped[str] = mapped_column(String, server_default="/defaultGamePic.png") #???
+    game_type: Mapped[str] = mapped_column(String, nullable=False,)
+    tags: Mapped[list["Tag"]] = relationship(secondary="game_tags", back_populates="games")
+    data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+#tags related to games
+class Tag(Base):
+    __tablename__ = "tags"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True)
+    game_id: Mapped[list["Game"]] = relationship(secondary="game_tags", back_populates="tags")
+
+#we need this model for realization of principe ManyToMany. It contains pairs game-tag
+class GameTag(Base): 
+    __tablename__ = "game_tags"
+    game_id: Mapped[int] = mapped_column(ForeignKey("games.id"), primary_key=True)
+    tag_id: Mapped[int] = mapped_column(ForeignKey("tags.id"), primary_key=True)
+
 
 class User(Base, SQLAlchemyBaseUserTable[int]):
     __tablename__ = "users"
     id: Mapped[str] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    username: Mapped[str] = mapped_column(String, nullable=False) #unique
-    email: Mapped[str] = mapped_column(String, nullable=False) #unique
+    username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(
         String(length=1024), nullable=False
     )
-    phone_number: Mapped[str] = mapped_column(String, nullable=True) #поставить деф значене, чтобы можно было не вводить
-    photo: Mapped[int] = mapped_column(Integer, default=1)
-    balance: Mapped[int] = mapped_column(Integer, default= 0)
-    total_deposit: Mapped[int] = mapped_column(Integer, default=0)
-    total_withdrawn: Mapped[int] = mapped_column(Integer, default = 0)
-    total_withdrawals: Mapped[int] = mapped_column(Integer, default = 0)
-    created_at: Mapped[str] =  mapped_column(TIMESTAMP, default = datetime.utcnow)
+    phone_number: Mapped[str] = mapped_column(String, nullable=True, server_default=None)
+    photo: Mapped[str] = mapped_column(String, server_default="/defaultUserPic.png")
+    balance: Mapped[int] = mapped_column(Integer, server_default= "0")
+    total_deposit: Mapped[int] = mapped_column(Integer, server_default="0")
+    total_withdrawn: Mapped[int] = mapped_column(Integer, server_default = "0")
+    total_withdrawals: Mapped[int] = mapped_column(Integer, server_default = "0")
+    created_at: Mapped[datetime] =  mapped_column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
     favorite_game_id: Mapped[Union[int, None]] =  mapped_column(ForeignKey(Game.id), nullable = True)
     favorite_game = relationship("Game")
     games_history = relationship("GameHistory", back_populates="user")
+
 
 class GameHistory(Base):
     __tablename__="games_history"
@@ -58,4 +73,11 @@ class GameHistory(Base):
 #     async with async_engine.begin() as conn:
 #         await conn.run_sync(Base.metadata.create_all)
 
-    
+# name: "Fortune Wheel"
+# ...
+# data: {
+#     cost: 25,
+#     sections: [ 
+#         50, 10, 100, 30, 5, 500, 20, 10
+#     ],
+# }

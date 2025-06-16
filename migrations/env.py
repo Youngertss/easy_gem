@@ -7,7 +7,7 @@ from alembic import context
 
 from src.config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
 from src.database import Base
-from src.auth.models import Game, User, GameHistory
+from src.auth.models import Game, User, GameHistory, Tag, GameTag
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
