@@ -5,6 +5,8 @@ class GameBase(BaseModel):
     name: str
     game_type: str
     data: dict
+    tags: list
+    photo: str
     created_at: datetime = datetime.utcnow()
     
     class Config:
@@ -15,6 +17,15 @@ class GameRead(GameBase):
 
 class GameCreate(GameBase):
     pass
+
+class TagCreate(BaseModel):
+    name: str
+    
+class TagRead(BaseModel):
+    id: int
+    name: str
+    games: list
+    
 
 class GameHistoryBase(BaseModel):
     user_id: int

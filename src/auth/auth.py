@@ -9,8 +9,7 @@ cookie_transport = CookieTransport(
     cookie_max_age=36000,
     # cookie_samesite=              "none",
     # cookie_secure=False
-    )
-                                                                        
+    )                                                    
 
 SECRET = "SECRET"
 

@@ -1,8 +1,8 @@
-"""fix game-tag relationship
+"""more fixes
 
-Revision ID: 6eb1f093dea7
-Revises: 3a63d5ad23a5
-Create Date: 2025-06-16 19:53:07.180772
+Revision ID: ec08fd8a313f
+Revises: 9f12ed2c2549
+Create Date: 2025-06-16 20:40:58.053130
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6eb1f093dea7'
-down_revision: Union[str, None] = '3a63d5ad23a5'
+revision: str = 'ec08fd8a313f'
+down_revision: Union[str, None] = '9f12ed2c2549'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
