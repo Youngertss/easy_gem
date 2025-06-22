@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 
 from src.database import get_async_session
-from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate
+from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate
 from src.games.crud import (db_create_game, db_get_game, db_get_all_games, db_add_game_history, 
                             db_get_user_history, db_upload_photo, db_get_tags, db_create_tag)
+from src.auth.auth import current_user
+from src.auth.models import User
 
 router = APIRouter(
     prefix="/games",
@@ -20,8 +22,8 @@ users_update_router = APIRouter(
 )
 
 @users_update_router.post("/upload_photo")
-async def upload_photo (user_id: int = Form(...), file: UploadFile = File(...), session: AsyncSession = Depends(get_async_session)):
-    response = await db_upload_photo(session, user_id, file)
+async def upload_photo (user: User = Depends(current_user), file: UploadFile = File(...), session: AsyncSession = Depends(get_async_session)):
+    response = await db_upload_photo(session, user, file)
     return response
 
 
@@ -60,6 +62,6 @@ async def get_tags(session: AsyncSession = Depends(get_async_session)):
     tags = await db_get_tags(session)
     return tags
 
-# realize get_current_user
+# @router.get("/get_fortune_wheel_event")
 
 # fortunewheel api

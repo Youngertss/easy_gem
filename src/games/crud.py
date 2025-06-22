@@ -13,7 +13,6 @@ from uuid import uuid4
 from src.games.models import Game, GameHistory, User, Tag, GameTag
 from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate
 
-
 async def db_create_game(game_info: GameCreate, session: AsyncSession):
     try:
         stmt = insert(Game).values(game_info.model_dump())
@@ -101,7 +100,7 @@ async def db_get_tags(session: AsyncSession):
         raise HTTPException(status_code=404, detail=f"Can't get tags: {e}")
 
     
-async def db_upload_photo(session: AsyncSession, user_id: int = Form(...), file: UploadFile = File(...)):
+async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFile = File(...)):
     try:
         file_ext = os.path.splitext(file.filename)[1] #get file extantion
         filename = f"{uuid4().hex}{file_ext}" #unique name for pic to save
@@ -109,9 +108,9 @@ async def db_upload_photo(session: AsyncSession, user_id: int = Form(...), file:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        query = select(User).where(User.id == user_id)
-        res = await session.execute(query)
-        currUser = res.scalars().first()
+        # query = select(User).where(User.id == user_id)
+        # res = await session.execute(query)
+        # currUser = res.scalars().first()
         
         if currUser.photo and currUser.photo!="/defaultUserPic.png":
             try:
