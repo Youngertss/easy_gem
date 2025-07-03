@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert
 
 from src.database import get_async_session
-from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate
+from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate, DepositRequest
 from src.games.crud import (db_create_game, db_get_game, db_get_all_games, db_add_game_history, 
-                            db_get_user_history, db_upload_photo, db_get_tags, db_create_tag)
+                            db_get_user_history, db_upload_photo, db_get_tags, db_create_tag, db_deposit)
+from src.games.crud_events import (db_get_fortune_wheel_event)
+
 from src.auth.auth import current_user
 from src.auth.models import User
 
@@ -26,6 +28,11 @@ async def upload_photo (user: User = Depends(current_user), file: UploadFile = F
     response = await db_upload_photo(session, user, file)
     return response
 
+@router.patch("/deposit")
+async def deposit(data: DepositRequest, user: User = Depends(current_user), session: AsyncSession = Depends(get_async_session)):
+    print(user)
+    response = await db_deposit(data.sum, session, user)
+    return response
 
 @router.post("/create_game")
 async def create_game(game_info: GameCreate, session: AsyncSession = Depends(get_async_session)):
@@ -62,6 +69,8 @@ async def get_tags(session: AsyncSession = Depends(get_async_session)):
     tags = await db_get_tags(session)
     return tags
 
-# @router.get("/get_fortune_wheel_event")
-
+@router.get("/get_fortune_wheel_event")
+async def get_fortune_wheel_event(session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+    fortune_wheel_event_data = await db_get_fortune_wheel_event(session, user)
+    return fortune_wheel_event_data
 # fortunewheel api

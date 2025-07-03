@@ -6,7 +6,7 @@ from fastapi_users import BaseUserManager, IntegerIDMixin
 from src.auth.models import User
 from src.auth.utils import get_user_db
 
-SECRET = "SECRET"   #change secret and add it tot .env
+SECRET = "SECRET"   #change secret and add it to .env
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET

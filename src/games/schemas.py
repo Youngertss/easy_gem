@@ -1,11 +1,25 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+class DepositRequest(BaseModel):
+    sum: int = Field(..., gt=0)
+
+class TagCreate(BaseModel):
+    name: str
+    
+class TagRead(BaseModel):
+    id: int
+    name: str
+    
+    class Config:
+        orm_mode = True
+        extra = "ignore" #to ignore Tag.games
 
 class GameBase(BaseModel):
     name: str
     game_type: str
     data: dict
-    tags: list
+    tags: list[int]
     photo: str
     created_at: datetime = datetime.utcnow()
     
@@ -14,18 +28,13 @@ class GameBase(BaseModel):
     
 class GameRead(GameBase):
     id: int
+    tags: list[TagRead]
+    
+    class Config:
+        orm_mode = True
 
 class GameCreate(GameBase):
     pass
-
-class TagCreate(BaseModel):
-    name: str
-    
-class TagRead(BaseModel):
-    id: int
-    name: str
-    games: list
-    
 
 class GameHistoryBase(BaseModel):
     user_id: int

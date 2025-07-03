@@ -15,9 +15,26 @@ from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistory
 
 async def db_create_game(game_info: GameCreate, session: AsyncSession):
     try:
-        stmt = insert(Game).values(game_info.model_dump())
-        await session.execute(stmt)
+        
+        result = await session.execute(select(Tag).where(Tag.id.in_(game_info.tags)))
+        tags = result.scalars().all()
+        
+        if len(tags) != len(game_info.tags):
+            raise HTTPException(status_code=400, detail="One or more tags not found")
+        
+        # stmt = insert(Game).values(game_info.model_dump())
+        new_game = Game(
+            name=game_info.name,
+            photo=game_info.photo,
+            game_type=game_info.game_type,
+            data=game_info.data,
+            tags=tags,
+            created_at=game_info.created_at
+        )
+        session.add(new_game)
         await session.commit()
+        await session.refresh(new_game)
+        return new_game
         
     except Exception as e:
         await session.rollback()
@@ -25,7 +42,7 @@ async def db_create_game(game_info: GameCreate, session: AsyncSession):
 
 async def db_get_game(game_id: int, session: AsyncSession):
     try:
-        query = select(Game).where(Game.id == game_id)
+        query = select(Game).where(Game.id == game_id).options(selectinload(Game.tags))
         result = await session.execute(query)
         game = result.scalars().first()
         
@@ -99,7 +116,19 @@ async def db_get_tags(session: AsyncSession):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't get tags: {e}")
 
-    
+async def db_deposit(sum: int, session: AsyncSession, user: User):
+    if sum <= 0:
+        raise HTTPException(status_code=400, detail="Deposit amount must be positive.")
+    try:
+        print(user)
+        user.balance += sum
+        await session.commit()
+        await session.refresh(user)
+        return {"updated_balance":user.balance}
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(404, detail=f"Problems while DEP {e}")
+
 async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFile = File(...)):
     try:
         file_ext = os.path.splitext(file.filename)[1] #get file extantion
@@ -123,9 +152,9 @@ async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFil
         currUser.photo = "/"+filename
         
         await session.commit()
-        await session.refresh(currUser)
+        # await session.refresh(currUser)
 
-        print(currUser.photo)
+        # print(currUser.photo)
         return {"avatar_url": f"/{filename}"}
     except Exception as e:
         await session.rollback()
