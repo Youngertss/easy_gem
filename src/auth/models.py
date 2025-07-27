@@ -4,7 +4,7 @@ from typing import Union, Any
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import Boolean, String, Integer, TIMESTAMP, ForeignKey, JSON, text
+from sqlalchemy import Boolean, String, Integer, TIMESTAMP, ForeignKey, JSON, text, DECIMAL
 from sqlalchemy.dialects.postgresql import TIMESTAMP as PG_TIMESTAMP
 
 from src.database import Base
@@ -42,7 +42,7 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     phone_number: Mapped[Union[str, None]] = mapped_column(String, nullable=True, server_default=None)
     photo: Mapped[str] = mapped_column(String, default="/defaultUserPic.png", nullable=False)
-    balance: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
+    balance: Mapped[float] = mapped_column(DECIMAL(12,2), server_default="0.0", default=0.0)
     total_deposit: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
     total_withdrawn: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
     total_withdrawals: Mapped[int] = mapped_column(Integer, server_default="0", default=0)

@@ -8,7 +8,7 @@ from src.database import get_async_session
 from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate, DepositRequest
 from src.games.crud import (db_create_game, db_get_game, db_get_all_games, db_add_game_history, 
                             db_get_user_history, db_upload_photo, db_get_tags, db_create_tag, db_deposit)
-from src.games.crud_events import (db_get_fortune_wheel_event)
+from src.games.crud_events import (db_get_fortune_wheel_event, db_get_safe_hack_event)
 
 from src.auth.auth import current_user
 from src.auth.models import User
@@ -73,4 +73,8 @@ async def get_tags(session: AsyncSession = Depends(get_async_session)):
 async def get_fortune_wheel_event(session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
     fortune_wheel_event_data = await db_get_fortune_wheel_event(session, user)
     return fortune_wheel_event_data
-# fortunewheel api
+
+@router.get("/get_safe_hack_event")
+async def get_safe_hack_event(sum_bet: float, chance: int, expected_result: float, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+    safe_hack_event_event_data = await db_get_safe_hack_event(sum_bet, chance, expected_result, session, user)
+    return safe_hack_event_event_data

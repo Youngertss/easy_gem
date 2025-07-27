@@ -122,6 +122,7 @@ async def db_deposit(sum: int, session: AsyncSession, user: User):
     try:
         print(user)
         user.balance += sum
+        user.total_deposit += sum
         await session.commit()
         await session.refresh(user)
         return {"updated_balance":user.balance}

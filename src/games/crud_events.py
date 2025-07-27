@@ -6,6 +6,8 @@ from sqlalchemy import select, insert
 from src.games.models import Game, GameHistory, User, Tag, GameTag
 from src.games.game_utils import wheelIncome
 
+from random import randint
+
 async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
     try:
         query = select(Game).where(Game.name=="FortuneWheel")
@@ -32,5 +34,32 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
 
         return event_res
     except Exception as e:
+        await session.rollback()
         raise HTTPException(400, detail=f"There is an error while processin fortune_wheel_event {e}")
-    
+
+async def db_get_safe_hack_event(sum_bet: float, chance: int, expected_result: float, session: AsyncSession, user: User):
+    try:
+        if user.balance<sum_bet:
+            raise HTTPException(403, detail=f"Not enough credits")
+        
+        won = False
+        random_num = randint(1,100)
+        if random_num<=chance:
+            won = True
+            user.balance += (expected_result-sum_bet)
+        else:
+            user.balance -= sum_bet
+            
+        await session.commit()
+        await session.refresh(user)
+        
+        data = {
+            "won": won,
+            "random_num": random_num,
+            "new_balance": user.balance
+        };
+        
+        return data
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(400, detail=f"There is an error while processin safe_hack_event {e}")
