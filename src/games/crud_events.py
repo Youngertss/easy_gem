@@ -7,6 +7,7 @@ from src.games.models import Game, GameHistory, User, Tag, GameTag
 from src.games.game_utils import wheelIncome
 
 from random import randint
+from decimal import Decimal
 
 async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
     try:
@@ -44,11 +45,11 @@ async def db_get_safe_hack_event(sum_bet: float, chance: int, expected_result: f
         
         won = False
         random_num = randint(1,100)
-        if random_num<=chance:
+        if random_num <= chance:
             won = True
-            user.balance += (expected_result-sum_bet)
+            user.balance += Decimal(str(expected_result)) - Decimal(str(sum_bet))
         else:
-            user.balance -= sum_bet
+            user.balance -= Decimal(str(sum_bet))
             
         await session.commit()
         await session.refresh(user)
