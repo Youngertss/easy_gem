@@ -64,6 +64,15 @@ class GameHistory(Base):
     user = relationship("User", back_populates="games_history")
     game = relationship("Game")
 
+class Message(Base):
+    __tablename__ = "messages"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    message: Mapped[str] = mapped_column(String, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    user = relationship("User", back_populates="messages")
+
 
 
 # async def create_db_and_tables():

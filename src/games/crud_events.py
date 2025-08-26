@@ -18,8 +18,6 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         print(fortune_wheel_data)
         
         if user.balance < fortune_wheel_data["cost"]:
-        #     user.balance -= fortune_wheel.data["cost"]
-        # else:
             raise HTTPException(403, detail="Not enough credits")
         
         #get res
@@ -29,10 +27,6 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         user.balance += income - fortune_wheel_data["cost"]
         
         await session.commit()
-        # await session.refresh(user)
-        # print(user.balance)
-        # print(fortune_wheel.data["cost"])
-
         return event_res
     except Exception as e:
         await session.rollback()

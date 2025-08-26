@@ -138,10 +138,6 @@ async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFil
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # query = select(User).where(User.id == user_id)
-        # res = await session.execute(query)
-        # currUser = res.scalars().first()
-        
         if currUser.photo and currUser.photo!="/defaultUserPic.png":
             try:
                 old_file_path = os.path.join("src/imgs/", currUser.photo.lstrip('/'))
@@ -153,9 +149,6 @@ async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFil
         currUser.photo = "/"+filename
         
         await session.commit()
-        # await session.refresh(currUser)
-
-        # print(currUser.photo)
         return {"avatar_url": f"/{filename}"}
     except Exception as e:
         await session.rollback()
