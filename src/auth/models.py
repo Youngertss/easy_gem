@@ -74,16 +74,6 @@ class Message(Base):
     user = relationship("User", back_populates="messages")
 
 
-
 # async def create_db_and_tables():
 #     async with async_engine.begin() as conn:
 #         await conn.run_sync(Base.metadata.create_all)
-
-# name: "Fortune Wheel"
-# ...
-# data: {
-#     cost: 25,
-#     sections: [ 
-#         50, 10, 100, 30, 5, 500, 20, 10
-#     ],
-# }

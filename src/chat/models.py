@@ -1,1 +1,1 @@
-from src.auth.models import Message
+from src.auth.models import Message, User
