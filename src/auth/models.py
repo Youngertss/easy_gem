@@ -71,7 +71,11 @@ class Message(Base):
     message: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
-    user = relationship("User", back_populates="messages")
+    user = relationship("User")
+    
+    @property
+    def author(self):
+        return self.user.username
 
 
 # async def create_db_and_tables():
