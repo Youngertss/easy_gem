@@ -1,17 +1,17 @@
 <h1>Site for gambling</h1>
 
-This project combine in itself such technologies as:
+This project combines in itself such technologies as:
 
-- <h6>FastAPI</h6> ➝ async backend:
-    •Postgresql database;
-    •Alembic migrations;
-    •Redis pub/sub with channels to conduct chat messaging;
-    ◦Cerely & flower are expected in future.
+- <h6>FastAPI</h6> -> async backend:
+    - Postgresql database;
+    - Alembic migrations;
+    - Redis pub/sub with channels to conduct chat messaging;
+    - ◦Cerely & flower are expected in future (probably).
 
-- <h6>React</h6> ➝ frontent (react create app):
-    •Zustand as storage to store user info.
+- <h6>React</h6> -> frontent (react create app):
+    - Zustand as storage to store user info.
 
-- <h6>Docker</h6> ➝ to run Redis server. (more usage in future are expexted)
+- <h6>Docker</h6> -> to run Redis server. (more usage in future are expexted)
 
 Now 2 games are available: SafeHack and FortuneWheel.
 
