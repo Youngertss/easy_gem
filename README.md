@@ -28,15 +28,27 @@ To start a project, first create an environment and download requirements:
 <h5>All commands run from the root of the project</h5>
 
 backend start:
-`uvicorn src.main:app --reload`
 
-frontend start (wathc another repo - https://github.com/Youngertss/easy_gem_front):
-`npm install`
-`npm start`
+```bash
+uvicorn src.main:app --reload
+```
+
+frontend start (watch another repo - <https://github.com/Youngertss/easy_gem_front>):
+
+```bash
+npm install
+npm start
+```
 
 alembic migrations:
-`alembic revision --autogenerate -m "..."`
-`alembic upgrade head`
+
+```bash
+alembic revision --autogenerate -m "..."
+alembic upgrade head
+```
 
 redis start (for chat):
-`docker compose up`
+
+```bash
+docker compose up
+```
