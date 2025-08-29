@@ -1,5 +1,7 @@
 <h1>Site for gambling</h1>
 
+<h2>This project combines in itself such technologies as:</h2>
+
 ### FastAPI → async backend
 
 - PostgreSQL database  
@@ -15,15 +17,18 @@
 
 - To run Redis server (more usage in future is expected)
 
-Now 2 games are available: SafeHack and FortuneWheel.
-
+Now 2 games are available: SafeHack and FortuneWheel
+All database models declared in file src/auth/models.py
 
 <h3>Here is instruction to the site</h3>
 
 To start a project, first create an environment and download requirements:
-`pyhton -m venv venv`
-`python venv/Scripts/activate`
-`pip install -r reqiurements.txt`
+
+```bash
+pyhton -m venv venv
+python venv/Scripts/activate
+pip install -r reqiurements.txt
+```
 
 <h5>All commands run from the root of the project</h5>
 
@@ -52,3 +57,5 @@ redis start (for chat):
 ```bash
 docker compose up
 ```
+
+Thanks for reading! Happy coding!✨
