@@ -11,7 +11,7 @@ class UserRead(schemas.BaseUser[int]):
     email: str
     phone_number: str
     photo: str
-    balance: int
+    balance: float
     total_deposit: int
     total_withdrawn: int
     total_withdrawals: int

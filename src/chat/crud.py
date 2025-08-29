@@ -24,7 +24,7 @@ async def db_get_last_messages(limit: int = 10, session: AsyncSession = None) ->
         messages = result.scalars().all()
         
         messages_json = [MessageSchema.model_validate(m).model_dump( mode="json") for m in messages]
-        print(messages_json)
+        # print(messages_json)
         return messages_json
     except SQLAlchemyError as e:
         print(f"Error retrieving messages from DB: {e}")
