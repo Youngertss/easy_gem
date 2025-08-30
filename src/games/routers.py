@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
+from fastapi import APIRouter, Depends, Query
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert
 
 from src.database import get_async_session
 from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate, DepositRequest
 from src.games.crud import (db_create_game, db_get_game, db_get_all_games, db_add_game_history, 
-                            db_get_user_history, db_upload_photo, db_get_tags, db_create_tag, db_deposit)
+                            db_get_user_history, db_get_tags, db_create_tag, db_deposit)
 from src.games.crud_events import (db_get_fortune_wheel_event, db_get_safe_hack_event)
 
 from src.auth.auth import current_user
@@ -18,15 +17,6 @@ router = APIRouter(
     tags=["Games"]
 )
 
-users_update_router = APIRouter(
-    prefix="/users",
-    tags=["users"],
-)
-
-@users_update_router.post("/upload_photo")
-async def upload_photo (user: User = Depends(current_user), file: UploadFile = File(...), session: AsyncSession = Depends(get_async_session)):
-    response = await db_upload_photo(session, user, file)
-    return response
 
 @router.patch("/deposit")
 async def deposit(data: DepositRequest, user: User = Depends(current_user), session: AsyncSession = Depends(get_async_session)):

@@ -6,9 +6,9 @@ from fastapi.staticfiles import StaticFiles
 
 from src.auth.auth import fastapi_users, auth_backend, current_user
 from src.auth.schemas import UserRead, UserCreate, UserUpdate
-from src.games.routers import router as games_router, users_update_router
+from src.games.routers import router as games_router
 from src.chat.routers import router as chat_router
-from src.auth.utils import additional_users_router
+from src.auth.routers import additional_users_router
 # from src.auth.models import create_db_and_tables
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -63,4 +63,3 @@ app.include_router(additional_users_router)
 
 app.include_router(chat_router)
 app.include_router(games_router)
-app.include_router(users_update_router)

@@ -1,13 +1,10 @@
-from fastapi import Depends, HTTPException, UploadFile, File, Form, Query
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, insert
 
 from typing import Optional
-import shutil
-import os
-from uuid import uuid4
 
 # from src.database import get_async_session
 from src.games.models import Game, GameHistory, User, Tag, GameTag
@@ -129,27 +126,3 @@ async def db_deposit(sum: int, session: AsyncSession, user: User):
     except Exception as e:
         await session.rollback()
         raise HTTPException(404, detail=f"Problems while DEP {e}")
-
-async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFile = File(...)):
-    try:
-        file_ext = os.path.splitext(file.filename)[1] #get file extantion
-        filename = f"{uuid4().hex}{file_ext}" #unique name for pic to save
-        file_path = os.path.join("src/imgs/", filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        if currUser.photo and currUser.photo!="/defaultUserPic.png":
-            try:
-                old_file_path = os.path.join("src/imgs/", currUser.photo.lstrip('/'))
-                if os.path.exists(old_file_path):
-                    os.remove(old_file_path)
-            except Exception as e:
-                print(f"Failed to delete old photo: {e}")
-    
-        currUser.photo = "/"+filename
-        
-        await session.commit()
-        return {"avatar_url": f"/{filename}"}
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(status_code=500, detail=f"failed uploading photo (games/crud): {e}")
