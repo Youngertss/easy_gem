@@ -34,13 +34,13 @@ async def db_upload_photo(session: AsyncSession, currUser: User, file: UploadFil
     try:
         file_ext = os.path.splitext(file.filename)[1] #get file extantion
         filename = f"{uuid4().hex}{file_ext}" #unique name for pic to save
-        file_path = os.path.join("src/imgs/", filename)
+        file_path = os.path.join("src/imgs/users_avatars", filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
         if currUser.photo and currUser.photo!="/defaultUserPic.png":
             try:
-                old_file_path = os.path.join("src/imgs/", currUser.photo.lstrip('/'))
+                old_file_path = os.path.join("src/imgs/users_avatars", currUser.photo.lstrip('/'))
                 if os.path.exists(old_file_path):
                     os.remove(old_file_path)
             except Exception as e:

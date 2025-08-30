@@ -2,7 +2,6 @@
 __pycache__/
 venv/
 
+# src/games/games_data.txt
 
-
-
-src/games/games_data.txt
+src/imgs/users_avatars
