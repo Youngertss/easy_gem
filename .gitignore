@@ -4,4 +4,4 @@ venv/
 
 # src/games/games_data.txt
 
-src/imgs/users_avatars
+src/imgs/users_avatars/*
