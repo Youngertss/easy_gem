@@ -6,6 +6,7 @@ from fastapi_users.db import SQLAlchemyBaseUserTable
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import Boolean, String, Integer, TIMESTAMP, ForeignKey, JSON, text, DECIMAL
 from sqlalchemy.dialects.postgresql import TIMESTAMP as PG_TIMESTAMP
+from sqlalchemy.sql import func
 
 from src.database import Base
 
@@ -16,9 +17,10 @@ class Game(Base):
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     photo: Mapped[str] = mapped_column(String, default="/defaultUserPic.png", nullable=False)
     game_type: Mapped[str] = mapped_column(String, nullable=False)
-    tags: Mapped[list["Tag"]] = relationship(secondary="game_tags", back_populates="games")
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    tags: Mapped[list["Tag"]] = relationship(secondary="game_tags", back_populates="games")
 
 
 class Tag(Base):
@@ -58,8 +60,13 @@ class GameHistory(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # исправлено с str на int
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     game_id: Mapped[int] = mapped_column(ForeignKey(Game.id), nullable=False)
+    bet:Mapped[int] = mapped_column(Integer)
     income: Mapped[int] = mapped_column(Integer)
-    played_at: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), default=datetime.utcnow, nullable=False)
+    played_at: Mapped[datetime] = mapped_column(
+        PG_TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
 
     user = relationship("User", back_populates="games_history")
     game = relationship("Game")

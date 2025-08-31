@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, insert
+from sqlalchemy import desc
 
 from typing import Optional
 
@@ -86,7 +87,12 @@ async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSessio
 
 async def db_get_user_history(user_id: int, session: AsyncSession):
     try:
-        query = select(GameHistory).where(GameHistory.user_id == user_id)
+        query = (
+            select(GameHistory)
+            .where(GameHistory.user_id == user_id)
+            .order_by(desc(GameHistory.played_at))
+            .options(selectinload(GameHistory.game))
+        )
         result = await session.execute(query)
         return result.scalars().all()
     

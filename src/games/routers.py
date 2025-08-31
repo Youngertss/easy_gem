@@ -44,7 +44,7 @@ async def add_game_history(game_info: GameHistoryCreate, session: AsyncSession =
     await db_add_game_history(game_info, session)
     return {"status":"success"}
 
-@router.get("/get_user_history")
+@router.get("/get_user_history/{user_id}")
 async def get_user_history(user_id: int, session: AsyncSession = Depends(get_async_session)):
     games_history = await db_get_user_history(user_id, session)
     return games_history

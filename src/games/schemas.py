@@ -39,8 +39,9 @@ class GameCreate(GameBase):
 class GameHistoryBase(BaseModel):
     user_id: int
     game_id: int
+    bet: int
     income: int
-    played_at: datetime = datetime.utcnow()
+    played_at: datetime
     
     class Config:
         arbitrary_types_allowed = True
