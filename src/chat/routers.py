@@ -5,7 +5,7 @@ from src.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.chat.crud import db_save_message, db_get_last_messages
 
-import aioredis
+import redis.asyncio as aioredis
 import json
 import asyncio
 
