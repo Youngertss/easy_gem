@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 # from sqlalchemy.orm import selectinload
 from sqlalchemy import select, insert
 
@@ -18,7 +19,7 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         fortune_wheel_data = fortune_wheel.data
         print(fortune_wheel_data)
         
-        if user.balance < fortune_wheel_data["cost"]:
+        if round(user.balance,2) < fortune_wheel_data["cost"]:
             raise HTTPException(403, detail="Not enough credits")
         
         #get res
@@ -44,7 +45,7 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
 
 async def db_get_safe_hack_event(sum_bet: float, chance: int, expected_result: float, session: AsyncSession, user: User):
     try:
-        if user.balance<sum_bet:
+        if round(user.balance, 2) < round(sum_bet,2):
             raise HTTPException(403, detail=f"Not enough credits")
         
         won = False
@@ -85,3 +86,32 @@ async def db_get_safe_hack_event(sum_bet: float, chance: int, expected_result: f
     except Exception as e:
         await session.rollback()
         raise HTTPException(400, detail=f"There is an error while processin safe_hack_event {e}")
+
+#miner end
+async def db_finish_miner_event(sum_bet: float, coefficient: float, session: AsyncSession, user: User):
+    try:
+        prize = round(sum_bet*coefficient, 2)
+        if prize < 0 and round(user.balance,2) < round(prize,2):
+            prize = -(user.balance)
+        user.balance += Decimal(str(prize))
+
+
+        #add game to history
+        query = select(Game).where(Game.name == "Miner")
+        result = await session.execute(query)
+        game = result.scalars().first()
+            
+        stmt = insert(GameHistory).values(
+            user_id = user.id,
+            game_id = game.id,
+            bet = sum_bet,
+            income = prize,
+            played_at=datetime.now(timezone.utc)
+        )
+        await session.execute(stmt)
+
+        await session.commit()
+        return {"result": "success"}
+    except Exception as e:
+        await session.rollback()
+        print("error while finishing Miner game", e)

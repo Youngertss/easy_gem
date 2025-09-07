@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +7,9 @@ from src.database import get_async_session
 from src.games.schemas import GameRead, GameCreate, GameHistoryRead, GameHistoryCreate, TagRead, TagCreate, DepositRequest
 from src.games.crud import (db_create_game, db_get_game, db_get_all_games, db_add_game_history, 
                             db_get_user_history, db_get_tags, db_create_tag, db_deposit)
-from src.games.crud_events import (db_get_fortune_wheel_event, db_get_safe_hack_event)
+from src.games.crud_events import (db_get_fortune_wheel_event, db_get_safe_hack_event,
+                                   db_finish_miner_event)
+from src.games.game_utils import get_start_miner_data
 
 from src.auth.auth import current_user
 from src.auth.models import User
@@ -68,3 +70,16 @@ async def get_fortune_wheel_event(session: AsyncSession = Depends(get_async_sess
 async def get_safe_hack_event(sum_bet: float, chance: int, expected_result: float, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
     safe_hack_event_event_data = await db_get_safe_hack_event(sum_bet, chance, expected_result, session, user)
     return safe_hack_event_event_data
+
+@router.get("/start_miner_event")
+async def start_miner_event(sum_bet: float, bombs_count: int, user: User = Depends(current_user)):
+    if round(user.balance,2) < sum_bet:
+        HTTPException(status_code=403, detail="not enough credits")
+    start_miner_evevnt_data = get_start_miner_data(bombs_count)
+    return start_miner_evevnt_data
+
+@router.get("/finish_miner_event")
+async def finish_miner_event(sum_bet: float, coefficient: float, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+    #if coefficient = -1 - user lost
+    result = await db_finish_miner_event(sum_bet, coefficient, session, user)
+    return result
