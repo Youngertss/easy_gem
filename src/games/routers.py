@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional
+from decimal import Decimal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,19 +68,19 @@ async def get_fortune_wheel_event(session: AsyncSession = Depends(get_async_sess
     return fortune_wheel_event_data
 
 @router.get("/get_safe_hack_event")
-async def get_safe_hack_event(sum_bet: float, chance: int, expected_result: float, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
-    safe_hack_event_event_data = await db_get_safe_hack_event(sum_bet, chance, expected_result, session, user)
+async def get_safe_hack_event(sum_bet: Decimal, chance: float, coefficient: Decimal, expected_result: Decimal, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+    safe_hack_event_event_data = await db_get_safe_hack_event(sum_bet, chance, coefficient, expected_result, session, user)
     return safe_hack_event_event_data
 
 @router.get("/start_miner_event")
-async def start_miner_event(sum_bet: float, bombs_count: int, user: User = Depends(current_user)):
-    if round(user.balance,2) < sum_bet:
-        HTTPException(status_code=403, detail="not enough credits")
+async def start_miner_event(sum_bet: Decimal, bombs_count: int, user: User = Depends(current_user)):
+    if user.balance < sum_bet:
+        raise HTTPException(status_code=403, detail="not enough credits")
     start_miner_evevnt_data = get_start_miner_data(bombs_count)
     return start_miner_evevnt_data
 
 @router.get("/finish_miner_event")
-async def finish_miner_event(sum_bet: float, coefficient: float, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+async def finish_miner_event(sum_bet: Decimal, coefficient: Decimal, bombs_count:int, session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
     #if coefficient = -1 - user lost
-    result = await db_finish_miner_event(sum_bet, coefficient, session, user)
+    result = await db_finish_miner_event(sum_bet, coefficient, bombs_count, session, user)
     return result

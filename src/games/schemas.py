@@ -1,8 +1,9 @@
 from datetime import datetime
+from decimal import Decimal
 from pydantic import BaseModel, Field
 
 class DepositRequest(BaseModel):
-    sum: int = Field(..., gt=0)
+    sum: Decimal = Field(..., gt=0)
 
 class TagCreate(BaseModel):
     name: str
@@ -39,9 +40,10 @@ class GameCreate(GameBase):
 class GameHistoryBase(BaseModel):
     user_id: int
     game_id: int
-    bet: int
-    income: int
+    bet: Decimal
+    income: Decimal
     played_at: datetime
+    extra_data: dict
     
     class Config:
         arbitrary_types_allowed = True

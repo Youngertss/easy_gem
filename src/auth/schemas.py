@@ -1,5 +1,5 @@
-
 from typing import Union
+from decimal import Decimal
 from datetime import date, datetime
 
 from fastapi_users import schemas, models
@@ -11,9 +11,9 @@ class UserRead(schemas.BaseUser[int]):
     email: str
     phone_number: str
     photo: str
-    balance: float
-    total_deposit: int
-    total_withdrawn: int
+    balance: Decimal
+    total_deposit: Decimal
+    total_withdrawn: Decimal
     total_withdrawals: int
     created_at: datetime
     favorite_game_id: Union[int, None]

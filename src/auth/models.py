@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Union, Any
+from decimal import Decimal
 
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
@@ -44,9 +45,9 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     phone_number: Mapped[Union[str, None]] = mapped_column(String, nullable=True, server_default=None)
     photo: Mapped[str] = mapped_column(String, default="/defaultUserPic.png", nullable=False)
-    balance: Mapped[float] = mapped_column(DECIMAL(12,2), server_default="0.0", default=0.0)
-    total_deposit: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
-    total_withdrawn: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
+    balance: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.0", default=0.0)
+    total_deposit: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.00", default=Decimal("0.00"))
+    total_withdrawn: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.00", default=Decimal("0.00"))
     total_withdrawals: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
     created_at: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
@@ -60,13 +61,14 @@ class GameHistory(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # исправлено с str на int
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     game_id: Mapped[int] = mapped_column(ForeignKey(Game.id), nullable=False)
-    bet:Mapped[int] = mapped_column(Integer)
-    income: Mapped[int] = mapped_column(Integer)
+    bet:Mapped[Decimal] = mapped_column(DECIMAL(12,2))
+    income: Mapped[int] = mapped_column(DECIMAL(12,2))
     played_at: Mapped[datetime] = mapped_column(
         PG_TIMESTAMP(timezone=True),
         server_default=func.now(),
         nullable=False
     )
+    extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
 
     user = relationship("User", back_populates="games_history")
     game = relationship("Game")

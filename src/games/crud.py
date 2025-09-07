@@ -6,6 +6,7 @@ from sqlalchemy import select, insert
 from sqlalchemy import desc
 
 from typing import Optional
+from decimal import Decimal
 
 # from src.database import get_async_session
 from src.games.models import Game, GameHistory, User, Tag, GameTag
@@ -119,9 +120,9 @@ async def db_get_tags(session: AsyncSession):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't get tags: {e}")
 
-async def db_deposit(sum: int, session: AsyncSession, user: User):
-    if sum <= 0:
-        raise HTTPException(status_code=400, detail="Deposit amount must be positive.")
+async def db_deposit(sum: Decimal, session: AsyncSession, user: User):
+    if sum <= 1:
+        raise HTTPException(status_code=400, detail="Deposit amount must be positive and at least 1 dollaer")
     try:
         print(user)
         user.balance += sum
