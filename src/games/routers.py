@@ -32,10 +32,18 @@ async def create_game(game_info: GameCreate, session: AsyncSession = Depends(get
     await db_create_game(game_info, session)
     return {"status":"success"}
 
-@router.get("/get_game", response_model = GameRead)
-async def get_game(id: int, session: AsyncSession = Depends(get_async_session)):
-    game = await db_get_game(id, session)
-    return game
+@router.get("/get_game", response_model=GameRead)
+async def get_game(
+    id: Optional[int] = None,
+    name: Optional[str] = None,
+    session: AsyncSession = Depends(get_async_session)
+):
+    if id is not None:
+        return await db_get_game(id, None, session)
+    elif name is not None:
+        return await db_get_game(None, name, session)
+    else:
+        raise HTTPException(status_code=400, detail="Provide either id or name")
 
 @router.get("/get_all_games")
 async def get_all_games(session: AsyncSession = Depends(get_async_session), tag: Optional[str] = Query(default=None)):

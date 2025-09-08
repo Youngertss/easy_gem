@@ -71,7 +71,7 @@ async def db_get_safe_hack_event(sum_bet: Decimal, chance: float, coefficient: D
             bet = sum_bet,
             income = Decimal(str(income_sum)),
             played_at=datetime.now(timezone.utc),
-            extra_data={"coefficient":float(coefficient), "chance": chance}
+            extra_data={"coefficient":float(coefficient)}
         )
         await session.execute(stmt)
             

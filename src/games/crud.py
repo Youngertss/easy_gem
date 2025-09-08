@@ -39,9 +39,19 @@ async def db_create_game(game_info: GameCreate, session: AsyncSession):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't create the game: {e}")
 
-async def db_get_game(game_id: int, session: AsyncSession):
+async def db_get_game(
+        game_id: Optional[int] = None,
+        name: Optional[str] = None,
+        session: AsyncSession = None
+    ):
     try:
-        query = select(Game).where(Game.id == game_id).options(selectinload(Game.tags))
+        if game_id is not None:
+            query = select(Game).where(Game.id == game_id).options(selectinload(Game.tags))
+        elif name is not None:
+            query = select(Game).where(Game.name == name).options(selectinload(Game.tags))
+        else:
+            raise HTTPException(status_code=400, detail="id or name is needed")
+        
         result = await session.execute(query)
         game = result.scalars().first()
         
@@ -52,6 +62,7 @@ async def db_get_game(game_id: int, session: AsyncSession):
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't get the game: {e}")
+
 
 async def db_get_all_games(session: AsyncSession, tag: Optional[str] = None):
     try:
