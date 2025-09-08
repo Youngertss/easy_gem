@@ -26,7 +26,7 @@ def get_start_miner_data(bombs_count) -> dict:
     cells = [1]*25
 
     while bombs_count != 0:
-        random_index = (random.randint(1,24))
+        random_index = (random.randint(0,24))
         if cells[random_index]:
             cells[random_index] = 0
             bombs_count-=1
