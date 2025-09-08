@@ -98,8 +98,9 @@ async def db_finish_miner_event(sum_bet: Decimal, coefficient: Decimal, bombs_co
             prize = -user.balance
 
         income = prize
-        user.balance += prize
+        user.balance += prize-sum_bet
         if prize < 0:
+            user.balance+=sum_bet
             income = Decimal("0")
 
         #add game to history
@@ -118,7 +119,7 @@ async def db_finish_miner_event(sum_bet: Decimal, coefficient: Decimal, bombs_co
         await session.execute(stmt)
 
         await session.commit()
-        return {"result": "success"}
+        return {"result": "success", "income":float(income)}
     except Exception as e:
         await session.rollback()
         print("error while finishing Miner game", e)

@@ -36,7 +36,8 @@ def get_start_miner_data(bombs_count) -> dict:
             "id": i, 
             "value": cells[i], 
             "opened": False, 
-            "rotation": random.randint(1,360)
+            "rotation": random.randint(1,360),
+            "exploaded": False
         } 
         for i in range(25)
     ]
