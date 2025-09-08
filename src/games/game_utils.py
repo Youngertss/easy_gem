@@ -30,6 +30,16 @@ def get_start_miner_data(bombs_count) -> dict:
         if cells[random_index]:
             cells[random_index] = 0
             bombs_count-=1
+    
+    cells = [
+        {
+            "id": i, 
+            "value": cells[i], 
+            "opened": False, 
+            "rotation": random.randint(1,360)
+        } 
+        for i in range(25)
+    ]
 
     print("Cells for the Miner", cells)
     return {"cells": cells}
