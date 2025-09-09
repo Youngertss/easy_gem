@@ -2,8 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, insert
-from sqlalchemy import desc
+from sqlalchemy import select, insert, desc, and_
 
 from typing import Optional
 from decimal import Decimal
@@ -97,16 +96,32 @@ async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSessio
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't add the game to history: {e}")
 
-async def db_get_user_history(user_id: int, session: AsyncSession):
+async def db_get_user_history(user_id: int, session: AsyncSession, last_id):
     try:
-        query = (
-            select(GameHistory)
-            .where(GameHistory.user_id == user_id)
-            .order_by(desc(GameHistory.played_at))
-            .options(selectinload(GameHistory.game))
-        )
+        if last_id is not None:
+            query = (
+                select(GameHistory)
+                .where(and_(
+                    GameHistory.user_id == user_id,
+                    GameHistory.id < last_id)
+                    )
+                .order_by(desc(GameHistory.played_at))
+                .limit(20)
+                .options(selectinload(GameHistory.game))
+            )
+        else:
+            query = (
+                select(GameHistory)
+                .where(GameHistory.user_id == user_id)
+                .order_by(desc(GameHistory.played_at))
+                .limit(20)
+                .options(selectinload(GameHistory.game))
+            )
         result = await session.execute(query)
-        return result.scalars().all()
+        history = result.scalars().all()
+        has_more = len(history) == 20
+
+        return {"history": history, "has_more": has_more}
     
     except Exception as e:
         await session.rollback()
