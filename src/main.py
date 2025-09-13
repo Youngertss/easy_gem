@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -9,6 +10,8 @@ from src.auth.schemas import UserRead, UserCreate, UserUpdate
 from src.games.routers import router as games_router
 from src.chat.routers import router as chat_router
 from src.auth.routers import additional_users_router
+
+from src.tasks import test_task
 # from src.auth.models import create_db_and_tables
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -40,6 +43,13 @@ app.add_middleware(
 @app.get("/")
 async def initial():
     return {"message":"it works"}
+
+@app.get("/celery_test_endpoint")
+async def celery_test_endpoint(t: int, res: str) -> dict:
+    response = test_task.delay(t, res)
+    ...
+    return JSONResponse({"response":f"task creted"})
+
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
