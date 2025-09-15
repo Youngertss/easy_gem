@@ -6,6 +6,7 @@ from sqlalchemy import select, insert
 
 from src.games.models import Game, GameHistory, User, Tag, GameTag
 from src.games.game_utils import wheelIncome
+from src.tasks import add_game_history_task
 
 from random import randint
 from decimal import Decimal, ROUND_HALF_UP
@@ -27,18 +28,16 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         income = event_res["income"]
         user.balance += income - fortune_wheel_data["cost"]
         
+
         #add game to history
-        stmt = insert(GameHistory).values(
-            user_id = user.id,
-            game_id = fortune_wheel.id,
-            bet = Decimal(str(fortune_wheel.data["cost"])),
-            income = Decimal(str(income)),
-            played_at=datetime.now(timezone.utc),
-            extra_data={}
-        )
-        await session.execute(stmt)
+        sum_bet = float(fortune_wheel.data["cost"])
+        income_sum = float(income)
+        extra_data={}
+        add_game_history_task.delay("FortuneWheel", user.id, sum_bet, income_sum, extra_data)
         
         await session.commit()
+        await session.refresh(user)
+        
         return event_res
     except Exception as e:
         await session.rollback()
@@ -57,28 +56,15 @@ async def db_get_safe_hack_event(sum_bet: Decimal, chance: float, coefficient: D
         else:
             user.balance -= sum_bet
             
-        #add game to history
-        query = select(Game).where(Game.name == "SafeHack")
-        result = await session.execute(query)
-        game = result.scalars().first()
-        income_sum = 0
-        if won:
-            income_sum = expected_result
-            
-        stmt = insert(GameHistory).values(
-            user_id = user.id,
-            game_id = game.id,
-            bet = sum_bet,
-            income = Decimal(str(income_sum)),
-            played_at=datetime.now(timezone.utc),
-            extra_data={"coefficient":float(coefficient)}
-        )
-        await session.execute(stmt)
-            
         await session.commit()
         await session.refresh(user)
-        
-        data = {
+
+        income_sum = expected_result if won else 0
+        extra_data={"coefficient":float(coefficient)}
+        # celery task
+        add_game_history_task.delay("SafeHack", user.id, sum_bet, income_sum, extra_data)
+
+        data = {    
             "won": won,
             "random_num": random_num,
             "new_balance": user.balance
@@ -103,22 +89,13 @@ async def db_finish_miner_event(sum_bet: Decimal, coefficient: Decimal, bombs_co
             user.balance+=sum_bet
             income = Decimal("0")
 
-        #add game to history
-        query = select(Game).where(Game.name == "Miner")
-        result = await session.execute(query)
-        game = result.scalars().first()
-            
-        stmt = insert(GameHistory).values(
-            user_id = user.id,
-            game_id = game.id,
-            bet = sum_bet,
-            income = income,
-            played_at=datetime.now(timezone.utc),
-            extra_data={"coefficient": float(coefficient),"bombs_count": bombs_count}
-        )
-        await session.execute(stmt)
-
         await session.commit()
+        await session.refresh(user) #without this line task wouldnt work
+
+        #add game to history
+        extra_data={"coefficient": float(coefficient),"bombs_count": bombs_count}
+        add_game_history_task.delay("Miner", user.id, sum_bet, income, extra_data)
+
         return {"result": "success", "income":float(income)}
     except Exception as e:
         await session.rollback()

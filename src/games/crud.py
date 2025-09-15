@@ -152,7 +152,7 @@ async def db_deposit(sum: Decimal, session: AsyncSession, user: User):
     try:
         print(user)
         if user.balance > 9000000:
-            raise HTTPException(400, detail="User have alreade has too much money")
+            raise HTTPException(400, detail="User have already has too much money")
         if sum > 1000000:
             raise HTTPException(400, detail="You can't dep more than 1.000.000 dollar per time")
         

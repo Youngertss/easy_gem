@@ -42,7 +42,6 @@ def get_start_miner_data(bombs_count) -> dict:
         for i in range(25)
     ]
 
-    print("Cells for the Miner", cells)
     return {"cells": cells}
 
 
