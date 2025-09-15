@@ -25,7 +25,7 @@ celery = Celery(
 celery.conf.beat_schedule = {
     "update-statistics-every-hour": {
         "task": "update_favorite_games_task",
-        "schedule": timedelta(seconds=15),
+        "schedule": timedelta(minutes=15),
         "args": (),
     },
 }
