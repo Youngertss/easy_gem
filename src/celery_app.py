@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from celery import Celery
+from celery.schedules import timedelta, crontab
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -20,5 +21,13 @@ celery = Celery(
     broker = CELERY_BROKER_URL,
     backend = CELERY_RESULT_BACKEND
 )
+
+celery.conf.beat_schedule = {
+    "update-statistics-every-hour": {
+        "task": "update_favorite_games_task",
+        "schedule": timedelta(seconds=15),
+        "args": (),
+    },
+}
 
 celery.autodiscover_tasks(['src.tasks'])

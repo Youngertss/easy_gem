@@ -46,6 +46,17 @@ services:
       - redis
       - app
 
+  celery_beat:
+    build: .
+    command: celery -A src.celery_app.celery beat --loglevel=info
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - app
+
   flower:
     build: .
     command: celery -A src.celery_app.celery flower --port=5555

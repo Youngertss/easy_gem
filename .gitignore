@@ -3,6 +3,7 @@ __pycache__/
 venv/
 
 # src/games/games_data.txt
+src/ignore.py
 
 src/imgs/users_avatars/*
 !src/imgs/users_avatars/defaultUserPic.png
