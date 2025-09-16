@@ -23,11 +23,18 @@ celery = Celery(
 )
 
 celery.conf.beat_schedule = {
-    "update-statistics-every-hour": {
+    "update_favorite_games_task": {
         "task": "update_favorite_games_task",
-        "schedule": timedelta(minutes=15),
+        "schedule": crontab(minute="*/15"),
         "args": (),
     },
+
+    "update_hour_statistic": {
+        "task": "update_hour_statistic",
+        "schedule": crontab(minute=0),
+        "args": (),
+    },
+    
 }
 
 celery.autodiscover_tasks(['src.tasks'])

@@ -7,13 +7,16 @@ from sqlalchemy import select, insert, desc, asc
 from sqlalchemy.orm import selectinload
 from src.auth.models import Game, GameHistory, User, SiteStatistic
 
+
 @celery.task(name="test_task")
 def test_task(time_towait, res):
     time.sleep(time_towait)
     return res
 
+
 @celery.task(name="update_favorite_games_task")
 def update_favorite_games_task():
+    
     with session_maker() as session:
         try:
             users = session.execute(select(User))
@@ -48,6 +51,20 @@ def update_favorite_games_task():
         except Exception as e:
             session.rollback()
             raise e
+
+
+@celery.task(name="update_hour_statistic")
+def update_hour_statistic():
+    with session_maker() as session:
+        try:
+            stats = session.execute(select(SiteStatistic))
+            stats = stats.scalars().first()
+            stats.total_earned_today = Decimal("0")
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+
 
 @celery.task(name="add_game_history_task")
 def add_game_history_task(game_name, user_id, sum_bet, income_sum, extra_data):
