@@ -19,14 +19,15 @@ Look for frontend on https://github.com/Youngertss/easy_gem_front
 
 - To run Fastapi app (now still using uvicorn)
 - To run Postgres DB with alembic migrations and seed data (games and tags)
-- To run Redis server (more usage in future is expected)
+- To run Redis server
 - To run celery, celery_beat and flower
 
-Now 3 games are available: FortuneWheel, SafeHack, Miner
+Now 3 games are available: FortuneWheel, SafeHack, Miner.
+
 All database models declared in file src/auth/models.py
 
 <h3>Here is instruction to the site</h3>
-The easiest way to start project on your local machine, is to use docker
+The easiest way to start the project on your local machine, is to use docker.
 
 Run in the root of project (add --build if it's first time)
 
@@ -38,10 +39,11 @@ docker compose up
 Don't forget to create .env file in the root with your data. You can see example of it in file environment_example.txt
 
 Now you will have fastapi on 127.0.0.1:8000 and Flower on 127.0.0.1:5555
-Frontend is in another repo.
+
+Frontend is in another repo (it will be 127.0.0.1:3000)
 
 
-<h5>If you don't wan't to use a docker, here is instruction.</h5>
+### If you don't wan't to use a docker, here is instruction.
 
 To start the project, first create an environment and download requirements:
 

@@ -4,7 +4,7 @@
 # from sqlalchemy.orm import mapped_column, Mapped, relationship
 # from sqlalchemy import Boolean, String, Integer, TIMESTAMP, JSON, ForeignKey
 
-from src.auth.models import Game, GameHistory, User, Tag, GameTag
+from src.auth.models import Game, GameHistory, User, Tag, GameTag, SiteStatistic
 
 # class Game(Base):
 #     __tablename__="games"

@@ -22,7 +22,7 @@ async def websocket_endpoint(
     await websocket.accept()
     
     #redis channels
-    redis = aioredis.from_url("redis://localhost")
+    redis = aioredis.from_url("redis://redis:6379/0")
     pubsub = redis.pubsub()
     await pubsub.subscribe("chat_channel")
     

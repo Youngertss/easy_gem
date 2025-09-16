@@ -47,6 +47,10 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     photo: Mapped[str] = mapped_column(String, default="/defaultUserPic.png", nullable=False)
     balance: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.0", default=0.0)
     total_deposit: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.00", default=Decimal("0.00"))
+
+    total_earned: Mapped[Decimal] = mapped_column(DECIMAL(17,2), server_default="0.00", default=Decimal("0.00"))
+    total_played: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
+
     total_withdrawn: Mapped[Decimal] = mapped_column(DECIMAL(12,2), server_default="0.00", default=Decimal("0.00"))
     total_withdrawals: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
     created_at: Mapped[datetime] = mapped_column(PG_TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
@@ -85,6 +89,13 @@ class Message(Base):
     @property
     def author(self):
         return self.user.username
+
+class SiteStatistic(Base):
+    __tablename__ = "site_statistics"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    total_earned: Mapped[Decimal] = mapped_column(DECIMAL(17,2), server_default="0.00", default=Decimal("0.00"))
+    total_played: Mapped[int] = mapped_column(Integer, server_default="0", default=0)
+    total_earned_today: Mapped[Decimal] = mapped_column(DECIMAL(15,2), server_default="0.00", default=Decimal("0.00"))
 
 
 # async def create_db_and_tables():

@@ -3,9 +3,9 @@ from decimal import Decimal
 from datetime import datetime, timezone
 
 from src.celery_app import celery, session_maker
-from sqlalchemy import select, insert, desc
+from sqlalchemy import select, insert, desc, asc
 from sqlalchemy.orm import selectinload
-from src.auth.models import Game, GameHistory, User
+from src.auth.models import Game, GameHistory, User, SiteStatistic
 
 @celery.task(name="test_task")
 def test_task(time_towait, res):

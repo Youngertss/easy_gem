@@ -2,8 +2,9 @@ import csv
 import json
 import asyncio
 from datetime import datetime
+from decimal import Decimal
 
-from src.auth.models import Game, GameTag, Tag
+from src.auth.models import Game, GameTag, Tag, SiteStatistic
 from src.database import async_session_maker
 from sqlalchemy import select, and_
 
@@ -62,6 +63,17 @@ async def create_init_records():
                     game_tags.append(game_tag)
             session.add_all(game_tags)
         await session.commit()
+
+        #---Statistics---
+        result = await session.execute(select(SiteStatistic))
+        if not result.scalars().first():
+            statistic = SiteStatistic(
+                total_earned = Decimal("0.00"),
+                total_played = 0,
+                total_earned_today = Decimal("0.00"),
+            )
+            session.add(statistic)
+            await session.commit()
 
 if __name__ == "__main__":
     asyncio.run(create_init_records())

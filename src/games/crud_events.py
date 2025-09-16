@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 # from sqlalchemy.orm import selectinload
 from sqlalchemy import select, insert
 
-from src.games.models import Game, GameHistory, User, Tag, GameTag
+from src.games.models import Game, GameHistory, User, Tag, GameTag, SiteStatistic
 from src.games.game_utils import wheelIncome
 from src.tasks import add_game_history_task
 
@@ -27,7 +27,15 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         event_res = wheelIncome(fortune_wheel_data)
         income = event_res["income"]
         user.balance += income - fortune_wheel_data["cost"]
-        
+        user.total_earned += Decimal(str(income))
+        user.total_played += 1
+
+        #---site statistic---
+        stats = await session.execute(select(SiteStatistic))
+        stats = stats.scalars().first()
+        stats.total_earned += Decimal(str(income))
+        stats.total_earned_today += Decimal(str(income))
+        stats.total_played += 1
 
         #add game to history
         sum_bet = float(fortune_wheel.data["cost"])
@@ -55,11 +63,21 @@ async def db_get_safe_hack_event(sum_bet: Decimal, chance: float, coefficient: D
             user.balance += expected_result - sum_bet
         else:
             user.balance -= sum_bet
-            
+
+        income_sum = expected_result if won else 0
+        user.total_earned += Decimal(str(income_sum))
+        user.total_played += 1
+
+        #---site statistic---
+        stats = await session.execute(select(SiteStatistic))
+        stats = stats.scalars().first()
+        stats.total_earned += Decimal(str(income_sum))
+        stats.total_earned_today += Decimal(str(income_sum))
+        stats.total_played += 1
+
         await session.commit()
         await session.refresh(user)
 
-        income_sum = expected_result if won else 0
         extra_data={"coefficient":float(coefficient)}
         # celery task
         add_game_history_task.delay("SafeHack", user.id, sum_bet, income_sum, extra_data)
@@ -88,6 +106,16 @@ async def db_finish_miner_event(sum_bet: Decimal, coefficient: Decimal, bombs_co
         if prize < 0:
             user.balance+=sum_bet
             income = Decimal("0")
+
+        user.total_earned += income
+        user.total_played += 1
+
+        #---site statistic---
+        stats = await session.execute(select(SiteStatistic))
+        stats = stats.scalars().first()
+        stats.total_earned += income
+        stats.total_earned_today += income
+        stats.total_played += 1
 
         await session.commit()
         await session.refresh(user) #without this line task wouldnt work

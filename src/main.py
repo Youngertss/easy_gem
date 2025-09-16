@@ -10,6 +10,8 @@ from src.auth.schemas import UserRead, UserCreate, UserUpdate
 from src.games.routers import router as games_router
 from src.chat.routers import router as chat_router
 from src.auth.routers import additional_users_router
+from src.statistics.routers import router as statistics_router
+
 
 from src.tasks import test_task
 # from src.auth.models import create_db_and_tables
@@ -71,5 +73,6 @@ app.include_router(
 )
 app.include_router(additional_users_router)
 
+app.include_router(statistics_router)
 app.include_router(chat_router)
 app.include_router(games_router)
