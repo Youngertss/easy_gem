@@ -3,7 +3,7 @@ __pycache__/
 venv/
 
 # src/games/games_data.txt
-# celerybeat-schedule
+celerybeat-schedule
 src/ignore.py
 
 src/imgs/users_avatars/*
