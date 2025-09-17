@@ -9,7 +9,7 @@ from src.auth.models import SiteStatistic, User
 
 async def db_get_leaderboard(limit: Optional[int] = 13, session: AsyncSession = None):
     try:
-        stmt = select(User).order_by(asc(User.total_earned)).limit(limit)
+        stmt = select(User).where(User.total_earned > Decimal("10")).order_by(desc(User.total_earned)).limit(limit)
         result = await session.execute(stmt)
         result = result.scalars().all()
 

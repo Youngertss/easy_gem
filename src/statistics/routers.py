@@ -10,8 +10,8 @@ from src.auth.auth import current_user
 from src.statistics.crud import db_get_leaderboard, db_get_site_statistic
 
 router = APIRouter(
-    prefix="/staticstics",
-    tags=["statistic"]
+    prefix="/statistics",
+    tags=["statistics"]
 )
 
 @router.get("/get_leaderboard")
