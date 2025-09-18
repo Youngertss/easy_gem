@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from src.celery_app import celery, session_maker
 from sqlalchemy import select, insert, desc, asc, delete, and_
 from sqlalchemy.orm import selectinload
-from src.auth.models import Game, GameHistory, User, SiteStatistic
+from src.auth.models import Game, GameHistory, User, SiteStatistic, Message
 
 
 @celery.task(name="test_task")
@@ -52,6 +52,7 @@ def update_favorite_games_task():
             session.rollback()
             raise e
 
+
 @celery.task(name="clear_users_history_task")
 def clear_users_history_task():
     with session_maker() as session:
@@ -83,6 +84,31 @@ def clear_users_history_task():
             session.rollback()
             raise e
 
+
+@celery.task(name="clear_chat_history_task")
+def clear_chat_history_task():
+    with session_maker() as session:
+        try:
+            last_messages_ids = (
+                session.execute(
+                    select(Message.id)
+                    .order_by(desc(Message.timestamp))
+                    .limit(30)
+                )
+            )
+            last_messages_ids = last_messages_ids.scalars().all()
+            if len(last_messages_ids) <= 30:
+                return
+
+            delete_stmt = delete(Message).where(
+                ~Message.id.in_(last_messages_ids)
+                )
+
+            session.execute(delete_stmt)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
 
 @celery.task(name="update_hour_statistic")
 def update_hour_statistic():
