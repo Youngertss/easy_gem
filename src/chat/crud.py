@@ -17,7 +17,7 @@ async def db_save_message(data_message, user_id: int, session: AsyncSession = No
         await session.rollback()
         print(f"Error saving message to DB: {e}")
 
-async def db_get_last_messages(limit: int = 10, session: AsyncSession = None) -> list[dict]:
+async def db_get_last_messages(limit: int = 29, session: AsyncSession = None) -> list[dict]:
     try:
         statement = select(Message).options(selectinload(Message.user)).order_by(Message.timestamp.desc()).limit(limit)
         result = await session.execute(statement)

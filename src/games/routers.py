@@ -46,8 +46,8 @@ async def get_game(
         raise HTTPException(status_code=400, detail="Provide either id or name")
 
 @router.get("/get_all_games")
-async def get_all_games(session: AsyncSession = Depends(get_async_session), tag: Optional[str] = Query(default=None)):
-    games = await db_get_all_games(session, tag)
+async def get_all_games(session: AsyncSession = Depends(get_async_session)):
+    games = await db_get_all_games(session)
     return games
 
 @router.post("/add_game_history")

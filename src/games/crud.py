@@ -63,22 +63,31 @@ async def db_get_game(
         raise HTTPException(status_code=404, detail=f"Can't get the game: {e}")
 
 
-async def db_get_all_games(session: AsyncSession, tag: Optional[str] = None):
+async def db_get_all_games(session: AsyncSession):
     try:
-        if tag:
-            query = (
-                select(Game)
-                .join(Game.tags)
-                .where(Tag.name == tag)
-                .options(selectinload(Game.tags)) #loading full tags, not only their ID's (on fast way by 1 additional query)
-                .distinct()
-            )
-        else:
-            query = select(Game).options(selectinload(Game.tags))
+        tags = await session.execute(
+            select(Tag).options(selectinload(Tag.games))
+        )
+        tags = tags.scalars().all()
 
-        result = await session.execute(query)
-        return result.scalars().all()
+        tags_amount = len(tags)
+        tag_games = {}
 
+        for tag in tags:
+            games = [{"game_name":game.name, "game_photo":game.photo} for game in tag.games]
+
+            if games != [] and len(games) > 1: #I don't have any tags where is only 1 game that has the 1 index (i mean all existing games still visible)
+                if tag.name == "the most popular":
+                    tag_games = {tag.name: games, **tag_games}
+                else:
+                    tag_games[tag.name] = games
+
+        data = {
+            "tags_amount": tags_amount,
+            "tag_games": tag_games
+        }
+
+        return data
     except SQLAlchemyError as e:
         await session.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

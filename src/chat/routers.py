@@ -33,7 +33,7 @@ async def websocket_endpoint(
     print("Greets to user:", username)
     
     #init message (curr situation in chat)
-    init_mesages = await db_get_last_messages(10, session)   #last 10 msgs
+    init_mesages = await db_get_last_messages(29, session)   #last 10 msgs
     await websocket.send_json({"messages": init_mesages})  
     
     async def listen_to_client():
