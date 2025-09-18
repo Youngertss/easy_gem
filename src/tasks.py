@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import datetime, timezone
 
 from src.celery_app import celery, session_maker
-from sqlalchemy import select, insert, desc, asc
+from sqlalchemy import select, insert, desc, asc, delete, and_
 from sqlalchemy.orm import selectinload
 from src.auth.models import Game, GameHistory, User, SiteStatistic
 
@@ -48,6 +48,37 @@ def update_favorite_games_task():
 
                 user.favorite_game_id = fav_id
                 session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+
+@celery.task(name="clear_users_history_task")
+def clear_users_history_task():
+    with session_maker() as session:
+        try:
+            users = session.execute(select(User))
+            users = users.scalars().all()
+            for user in users:
+                last_histories_ids = (
+                    session.execute(
+                        select(GameHistory.id)
+                        .where(GameHistory.user_id == user.id)
+                        .order_by(desc(GameHistory.played_at))
+                        .limit(100)
+                    )
+                )
+                last_histories_ids = last_histories_ids.scalars().all()
+                if len(last_histories_ids) <= 100:
+                    continue
+
+                delete_stmt = delete(GameHistory).where(and_(
+                    GameHistory.user_id == user.id,
+                    ~GameHistory.id.in_(last_histories_ids)
+                    ))
+
+                session.execute(delete_stmt)
+            session.commit()
+
         except Exception as e:
             session.rollback()
             raise e

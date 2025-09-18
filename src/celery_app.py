@@ -34,6 +34,12 @@ celery.conf.beat_schedule = {
         "schedule": crontab(minute=0),
         "args": (),
     },
+
+    "clear_users_history_task": {
+        "task": "clear_users_history_task",
+        "schedule": crontab(minute=0),
+        "args": (),
+    },
     
 }
 
