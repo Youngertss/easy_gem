@@ -38,6 +38,7 @@ async def db_create_game(game_info: GameCreate, session: AsyncSession):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't create the game: {e}")
 
+
 async def db_get_game(
         game_id: Optional[int] = None,
         name: Optional[str] = None,
@@ -94,7 +95,8 @@ async def db_get_all_games(session: AsyncSession):
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Cant get games: {e}")
-    
+
+
 async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSession):
     try:
         stmt = insert(GameHistory).values(game_info.model_dump())
@@ -104,6 +106,7 @@ async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSessio
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't add the game to history: {e}")
+
 
 async def db_get_user_history(user_id: int, session: AsyncSession, last_id):
     try:
@@ -136,6 +139,7 @@ async def db_get_user_history(user_id: int, session: AsyncSession, last_id):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't get user history: {e}")
 
+
 async def db_create_tag(name: str, session: AsyncSession):
     try:
         stmt = insert(Tag).values({"name":name})
@@ -146,6 +150,7 @@ async def db_create_tag(name: str, session: AsyncSession):
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Cat't create tag: {e}")
 
+
 async def db_get_tags(session: AsyncSession):
     try:
         query = select(Tag)
@@ -154,6 +159,7 @@ async def db_get_tags(session: AsyncSession):
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Can't get tags: {e}")
+
 
 async def db_deposit(sum: Decimal, session: AsyncSession, user: User):
     if sum <= 1:

@@ -1,8 +1,8 @@
 it is an example of .env file for starting project:
 
-SECRET = SECRET
+SECRET = 3AW6t7Z2SizC4yaogE6KiL27S0Hv5ACbAv9BAm1IjV0=
 
-# DB_HOST = localhost -
+#DB_HOST = localhost - without docker
 DB_HOST = db #- if use docker
 DB_PORT = 5432
 DB_NAME = easygem

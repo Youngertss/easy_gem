@@ -12,7 +12,7 @@ cookie_transport = CookieTransport(
     )         
 # bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")                                           
 
-SECRET = "SECRET"
+from src.config import SECRET
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=360000)
