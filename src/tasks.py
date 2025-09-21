@@ -1,11 +1,12 @@
 import time
-from decimal import Decimal
 from datetime import datetime, timezone
+from decimal import Decimal
 
-from src.celery_app import celery, session_maker
-from sqlalchemy import select, insert, desc, asc, delete, and_
+from sqlalchemy import and_, asc, delete, desc, insert, select
 from sqlalchemy.orm import selectinload
-from src.auth.models import Game, GameHistory, User, SiteStatistic, Message
+
+from src.auth.models import Game, GameHistory, Message, SiteStatistic, User
+from src.celery_app import celery, session_maker
 
 
 @celery.task(name="test_task")
@@ -16,7 +17,7 @@ def test_task(time_towait, res):
 
 @celery.task(name="update_favorite_games_task")
 def update_favorite_games_task():
-    
+
     with session_maker() as session:
         try:
             users = session.execute(select(User))
@@ -60,22 +61,22 @@ def clear_users_history_task():
             users = session.execute(select(User))
             users = users.scalars().all()
             for user in users:
-                last_histories_ids = (
-                    session.execute(
-                        select(GameHistory.id)
-                        .where(GameHistory.user_id == user.id)
-                        .order_by(desc(GameHistory.played_at))
-                        .limit(100)
-                    )
+                last_histories_ids = session.execute(
+                    select(GameHistory.id)
+                    .where(GameHistory.user_id == user.id)
+                    .order_by(desc(GameHistory.played_at))
+                    .limit(100)
                 )
                 last_histories_ids = last_histories_ids.scalars().all()
                 if len(last_histories_ids) <= 100:
                     continue
 
-                delete_stmt = delete(GameHistory).where(and_(
-                    GameHistory.user_id == user.id,
-                    ~GameHistory.id.in_(last_histories_ids)
-                    ))
+                delete_stmt = delete(GameHistory).where(
+                    and_(
+                        GameHistory.user_id == user.id,
+                        ~GameHistory.id.in_(last_histories_ids),
+                    )
+                )
 
                 session.execute(delete_stmt)
             session.commit()
@@ -89,26 +90,21 @@ def clear_users_history_task():
 def clear_chat_history_task():
     with session_maker() as session:
         try:
-            last_messages_ids = (
-                session.execute(
-                    select(Message.id)
-                    .order_by(desc(Message.timestamp))
-                    .limit(30)
-                )
+            last_messages_ids = session.execute(
+                select(Message.id).order_by(desc(Message.timestamp)).limit(30)
             )
             last_messages_ids = last_messages_ids.scalars().all()
             if len(last_messages_ids) <= 30:
                 return
 
-            delete_stmt = delete(Message).where(
-                ~Message.id.in_(last_messages_ids)
-                )
+            delete_stmt = delete(Message).where(~Message.id.in_(last_messages_ids))
 
             session.execute(delete_stmt)
             session.commit()
         except Exception as e:
             session.rollback()
             raise e
+
 
 @celery.task(name="update_hour_statistic")
 def update_hour_statistic():
@@ -136,7 +132,7 @@ def add_game_history_task(game_name, user_id, sum_bet, income_sum, extra_data):
                 bet=Decimal(str(sum_bet)),
                 income=Decimal(str(income_sum)),
                 played_at=datetime.now(timezone.utc),
-                extra_data=extra_data
+                extra_data=extra_data,
             )
             session.execute(stmt)
             session.commit()

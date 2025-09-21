@@ -1,10 +1,9 @@
-
 # from datetime import datetime
 
 # from sqlalchemy.orm import mapped_column, Mapped, relationship
 # from sqlalchemy import Boolean, String, Integer, TIMESTAMP, JSON, ForeignKey
 
-from src.auth.models import Game, GameHistory, User, Tag, GameTag, SiteStatistic
+from src.auth.models import Game, GameHistory, GameTag, SiteStatistic, Tag, User
 
 # class Game(Base):
 #     __tablename__="games"
@@ -22,7 +21,6 @@ from src.auth.models import Game, GameHistory, User, Tag, GameTag, SiteStatistic
 #     game_id: Mapped[int] = mapped_column(ForeignKey(Game.id), nullable=False)
 #     income: Mapped[int] = mapped_column(String)
 #     played_at: Mapped[str] = mapped_column(TIMESTAMP, default=datetime.utcnow, nullable=False)
-    
+
 #     user = relationship("User", back_populates="games_history")
 #     game = relationship("Game")
-    

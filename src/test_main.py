@@ -1,37 +1,43 @@
-import pytest
-from httpx import ASGITransport, AsyncClient
-from fastapi import Depends
-
 from typing import AsyncGenerator
+
+import pytest
+from fastapi import Depends
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from src.config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+
+from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
+from src.database import get_async_session
+from src.main import app
+
 # from fastapi.testclient import TestClient
 # client = TestClient(app)
 
-from src.main import app
-from src.database import get_async_session
 
-#DB_NAME change on DB_TEST_NAME
+# DB_NAME change on DB_TEST_NAME
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 async_engine = create_async_engine(DATABASE_URL)
 async_session_maker = async_sessionmaker(async_engine, expire_on_commit=True)
 
+
 async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
 
+
 app.dependency_overrides[get_async_session] = override_get_async_session
+
 
 @pytest.fixture
 def anyio_backend():
-    return 'asyncio'
+    return "asyncio"
 
 
 @pytest.fixture
 async def async_session():
     async with get_async_session() as session:
         yield session
+
 
 @pytest.mark.anyio
 async def test_root():
@@ -50,8 +56,9 @@ async def test_get_games():
     ) as ac:
         response = await ac.get("/games/get_all_games")
     data = response.json()
-    assert (data["tags_amount"] != [] and data["tag_games"]!= [])
+    assert data["tags_amount"] != [] and data["tag_games"] != []
     assert data["tag_games"] != {}
+
 
 # @pytest.mark.anyio
 # @pytest.mark.parametrize("name", ["FortuneWheel"])
@@ -84,5 +91,5 @@ async def test_get_games():
 #     assert data["name"] == name
 #     assert data["extra_data"] != {}
 
-    
+
 # pytest src/test_main.py -v\

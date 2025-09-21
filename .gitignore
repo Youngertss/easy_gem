@@ -1,5 +1,6 @@
 .env
 __pycache__/
+
 venv/
 
 # src/games/games_data.txt

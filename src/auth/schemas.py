@@ -1,8 +1,8 @@
-from typing import Union
-from decimal import Decimal
 from datetime import date, datetime
+from decimal import Decimal
+from typing import Union
 
-from fastapi_users import schemas, models
+from fastapi_users import models, schemas
 
 
 class UserRead(schemas.BaseUser[int]):
@@ -20,13 +20,14 @@ class UserRead(schemas.BaseUser[int]):
     created_at: datetime
     favorite_game_id: Union[int, None]
 
+
 class UserCreate(schemas.BaseUserCreate):
     username: str
     email: str
     phone_number: str
     password: str
     created_at: datetime = datetime.utcnow
-    
+
 
 class UserUpdate(schemas.BaseUserUpdate):
     pass
