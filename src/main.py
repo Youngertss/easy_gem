@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -12,6 +12,7 @@ from src.chat.routers import router as chat_router
 from src.games.routers import router as games_router
 from src.statistics.routers import router as statistics_router
 from src.tasks import test_task
+from src.utils import InsufficientBalanceException
 
 # from src.auth.models import create_db_and_tables
 # @asynccontextmanager
@@ -39,6 +40,28 @@ app.add_middleware(
     allow_methods=["*", "/patch", "patch"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def balance_exception_middleware(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except InsufficientBalanceException as exc:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "Insufficient balance",
+                "user_id": exc.user_id,
+                "required": float(exc.required),
+                "current": float(exc.current)
+            }
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Internal server error"}
+        )
 
 
 @app.get("/")

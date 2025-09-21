@@ -9,6 +9,7 @@ from sqlalchemy import insert, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.utils import InsufficientBalanceException
 from src.games.game_utils import wheelIncome
 from src.games.models import Game, GameHistory, GameTag, SiteStatistic, Tag, User
 from src.tasks import add_game_history_task
@@ -23,7 +24,9 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         print(fortune_wheel_data)
 
         if round(user.balance, 2) < fortune_wheel_data["cost"]:
-            raise HTTPException(403, detail="Not enough credits")
+            raise InsufficientBalanceException(
+                user.id, required=fortune_wheel_data["cost"], current=user.balance
+            )
 
         # get res
         event_res = wheelIncome(fortune_wheel_data)
@@ -68,7 +71,9 @@ async def db_get_safe_hack_event(
 ):
     try:
         if user.balance < sum_bet:
-            raise HTTPException(403, detail=f"Not enough credits")
+            raise InsufficientBalanceException(
+                user.id, required=sum_bet, current=user.balance
+            )
 
         won = False
         random_num = randint(1, 100)
@@ -101,7 +106,7 @@ async def db_get_safe_hack_event(
         data = {"won": won, "random_num": random_num, "new_balance": user.balance}
 
         return data
-    except Exception as e:
+    except SQLAlchemyError as e:
         await session.rollback()
         raise HTTPException(
             400, detail=f"There is an error while processin safe_hack_event {e}"
@@ -117,6 +122,11 @@ async def db_finish_miner_event(
     user: User,
 ):
     try:
+        if user.balance < sum_bet:
+            raise InsufficientBalanceException(
+                user.id, required=sum_bet, current=user.balance
+            )
+        
         prize = (sum_bet * coefficient).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
