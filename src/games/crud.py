@@ -114,7 +114,7 @@ async def db_add_game_history(game_info: GameHistoryCreate, session: AsyncSessio
         )
 
 
-async def db_get_user_history(user_id: int, session: AsyncSession, last_id):
+async def db_get_user_history(user_id: int, session: AsyncSession, last_id: int = None):
     try:
         if last_id is not None:
             query = (
