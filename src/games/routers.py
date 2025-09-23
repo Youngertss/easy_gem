@@ -51,8 +51,8 @@ async def deposit(
 async def create_game(
     game_info: GameCreate, session: AsyncSession = Depends(get_async_session)
 ):
-    await db_create_game(game_info, session)
-    return {"status": "success"}
+    new_game = await db_create_game(game_info, session)
+    return new_game
 
 
 @router.get("/get_game", response_model=GameRead)
@@ -94,8 +94,8 @@ async def get_user_history(
 
 
 @router.post("/create_tag")
-async def create_tag(name: str, session: AsyncSession = Depends(get_async_session)):
-    result = await db_create_tag(name, session)
+async def create_tag(tag: TagCreate, session: AsyncSession = Depends(get_async_session)) -> TagRead:
+    result = await db_create_tag(tag, session)
     return result
 
 

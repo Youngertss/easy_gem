@@ -8,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 from src.database import get_async_session
 from src.main import app
-from src.games.crud import db_get_game, db_get_user_history
-from src.auth.routers import get_user_by_name
 
 
 # DB_NAME change on DB_TEST_NAME
@@ -19,6 +17,8 @@ async_engine = create_async_engine(DATABASE_URL)
 
 
 pytestmark = pytest.mark.anyio
+# @pytest.mark.anyio - we dont need this more thx to "pytestmark = pytest.mark.anyio"
+
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
@@ -82,51 +82,4 @@ async def client(
     await transaction.rollback()
 
 
-#-----TESTING----
-
-# # @pytest.mark.anyio - we dont need this thx to "pytestmark = pytest.mark.anyio"
-async def test_root():
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
-        response = await ac.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "it works"}
-
-
-async def test_get_user_history_db(session: AsyncSession):
-    history = await db_get_user_history(2, session)
-    history = history["history"]
-    assert history
-
-
-#We can also use pytest.mark.parametrize(name, ("name1", "name2")) #to test several names etc
-async def test_get_game(session: AsyncSession):
-    game = await db_get_game(game_id=3, session=session)
-    assert game.name == "Miner"
-
-    game = await db_get_game(name="FortuneWheel", session=session)
-    assert game.id == 1
-
-
-async def test_get_games_api():
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
-        response = await ac.get("/games/get_all_games")
-    data = response.json()
-    assert data["tags_amount"] != [] and data["tag_games"] != []
-    assert data["tag_games"] != {}
-
-
-
-@pytest.mark.parametrize("name", ("FortuneWheel",))
-async def test_get_game_by_name_api(client: AsyncClient, name):
-    async with client as ac:
-        response = await ac.get(f"/games/get_game?name={name}")
-    response = response.json()
-    assert response["name"] == name
-
-
-
-# pytest src/test_main.py -v\
+# pytest (-v - visible process of testing) (-s - visible prints)

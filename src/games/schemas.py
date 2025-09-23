@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -16,9 +16,10 @@ class TagRead(BaseModel):
     id: int
     name: str
 
-    class Config:
-        orm_mode = True
-        extra = "ignore"  # to ignore Tag.games
+    model_config = {
+        "from_attributes": True,
+        "extra": "ignore"
+    }
 
 
 class GameBase(BaseModel):
@@ -27,7 +28,7 @@ class GameBase(BaseModel):
     data: dict
     tags: list[int]
     photo: str
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Config:
         arbitrary_types_allowed = True
@@ -37,8 +38,10 @@ class GameRead(GameBase):
     id: int
     tags: list[TagRead]
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True,
+        "extra": "ignore"
+    }
 
 
 class GameCreate(GameBase):

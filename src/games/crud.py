@@ -9,10 +9,10 @@ from sqlalchemy.orm import selectinload
 
 # from src.database import get_async_session
 from src.games.models import Game, GameHistory, GameTag, Tag, User
-from src.games.schemas import GameCreate, GameHistoryCreate, GameHistoryRead, GameRead
+from src.games.schemas import GameCreate, GameHistoryCreate, GameHistoryRead, GameRead, TagCreate, TagRead
 
 
-async def db_create_game(game_info: GameCreate, session: AsyncSession):
+async def db_create_game(game_info: GameCreate, session: AsyncSession) -> GameRead:
     try:
 
         result = await session.execute(select(Tag).where(Tag.id.in_(game_info.tags)))
@@ -143,12 +143,13 @@ async def db_get_user_history(user_id: int, session: AsyncSession, last_id: int 
         raise HTTPException(status_code=404, detail=f"Can't get user history: {e}")
 
 
-async def db_create_tag(name: str, session: AsyncSession):
+async def db_create_tag(tag: TagCreate, session: AsyncSession) -> TagRead:
     try:
-        stmt = insert(Tag).values({"name": name})
-        await session.execute(stmt)
+        db_tag = Tag(**tag.model_dump())
+        session.add(db_tag)
         await session.commit()
-        return "tag created"
+        await session.refresh(db_tag)  # чтобы получить сгенерированный id
+        return TagRead.model_validate(db_tag)
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=404, detail=f"Cat't create tag: {e}")
