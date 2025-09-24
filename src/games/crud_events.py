@@ -68,6 +68,7 @@ async def db_get_safe_hack_event(
     expected_result: Decimal,
     session: AsyncSession,
     user: User,
+    testing: bool = False
 ):
     try:
         if user.balance < sum_bet:
@@ -95,13 +96,15 @@ async def db_get_safe_hack_event(
         stats.total_played += 1
 
         await session.commit()
-        await session.refresh(user)
+    
 
         extra_data = {"coefficient": float(coefficient)}
+        if not testing:
         # celery task
-        add_game_history_task.delay(
-            "SafeHack", user.id, sum_bet, income_sum, extra_data
-        )
+            await session.refresh(user)
+            add_game_history_task.delay(
+                "SafeHack", user.id, sum_bet, income_sum, extra_data
+            )
 
         data = {"won": won, "random_num": random_num, "new_balance": user.balance}
 
@@ -109,8 +112,14 @@ async def db_get_safe_hack_event(
     except SQLAlchemyError as e:
         await session.rollback()
         raise HTTPException(
+            400, detail=f"There is an error SQLALCHEMY while processin safe_hack_event {e}"
+        )
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
             400, detail=f"There is an error while processin safe_hack_event {e}"
         )
+
 
 
 # miner end

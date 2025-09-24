@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.utils import InsufficientBalanceException
 from src.auth.auth import current_user
 from src.auth.models import User
 from src.database import get_async_session
@@ -122,9 +123,10 @@ async def get_safe_hack_event(
     expected_result: Decimal,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
+    testing: bool = False
 ):
     safe_hack_event_event_data = await db_get_safe_hack_event(
-        sum_bet, chance, coefficient, expected_result, session, user
+        sum_bet, chance, coefficient, expected_result, session, user, testing
     )
     return safe_hack_event_event_data
 
@@ -134,7 +136,9 @@ async def start_miner_event(
     sum_bet: Decimal, bombs_count: int, user: User = Depends(current_user)
 ):
     if user.balance < sum_bet:
-        raise HTTPException(status_code=403, detail="not enough credits")
+        raise InsufficientBalanceException(
+                user.id, required=sum_bet, current=user.balance
+            )
     start_miner_evevnt_data = get_start_miner_data(bombs_count)
     return start_miner_evevnt_data
 

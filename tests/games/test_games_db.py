@@ -1,5 +1,8 @@
-from src.games.crud import db_get_game
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, insert
+
+from src.games.crud import db_get_game
+from src.auth.models import User
 
 import pytest
 pytestmark = pytest.mark.anyio

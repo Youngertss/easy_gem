@@ -11,5 +11,5 @@ async def test_login(client: AsyncClient):
     }
     async with client as ac:
         response = await ac.post("/auth/jwt/login", json=data)
-    print("RESPONSE", response.json())
+    print("RESPONSE", response.json()) #ERROR
     assert response.json()

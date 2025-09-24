@@ -3,10 +3,12 @@ from typing import AsyncGenerator
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_engine, async_sessionmaker, AsyncTransaction
-# from sqlalchemy import select, insert, and_, desc, inc
+from sqlalchemy import select
 
 from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 from src.database import get_async_session
+from src.auth.models import User
+from src.auth.auth import current_user
 from src.main import app
 
 
@@ -71,15 +73,40 @@ async def client(
         )
         async with async_session:
             yield async_session
-    
+
+    async def override_current_user():
+        async_session = AsyncSession(
+            bind=connection,
+            join_transaction_mode="create_savepoint",
+        )
+        user = await async_session.execute(select(User).where(User.id==2))
+        user = user.scalars().first()
+        return user 
+
+    app.dependency_overrides[current_user] = override_current_user
     # Here you have to override the dependency that is used in FastAPI's
     # endpoints to get SQLAlchemy's AsyncSession. In my case, it is
     # get_async_session
     app.dependency_overrides[get_async_session] = override_get_async_session
     yield AsyncClient(app=app, base_url="http://test")
     del app.dependency_overrides[get_async_session]
+    del app.dependency_overrides[current_user]
 
     await transaction.rollback()
 
+
+#fixture to get user and give it to functions that
+#have dependecies get_current_user
+@pytest.fixture
+async def user(session: AsyncSession):
+    async def current_user_override():
+        user = await session.execute(select(User).where(User.id==2))
+        user = user.scalars().first()
+        return user 
+
+    app.dependency_overrides[current_user] = current_user_override
+    yield user
+
+    del app.dependency_overrides[get_async_session]
 
 # pytest (-v - visible process of testing) (-s - visible prints)
