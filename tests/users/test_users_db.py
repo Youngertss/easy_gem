@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+from httpx import ASGITransport, AsyncClient
 
 from src.games.crud import db_get_user_history
 
@@ -12,3 +13,4 @@ async def test_get_user_history_db(session: AsyncSession):
     history = history["history"]
     assert history
 
+    
