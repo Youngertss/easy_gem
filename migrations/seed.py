@@ -36,48 +36,48 @@ async def create_init_records():
                         photo=row["photo"].strip('"'),
                         game_type=row["game_type"].strip('"'),
                         data=json.loads(row["data"]),
-                        created_at=datetime.fromisoformat(row["created_at"].strip('"'))
+                        created_at=datetime.fromisoformat(row["created_at"].strip('"')),
                     )
                     games.append(game)
 
             session.add_all(games)
         await session.commit()
 
-        #---GameTags ----
+        # ---GameTags ----
         with open("src/games/game_tags.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             game_tags = []
             for row in reader:
-                game_id=int(row["game_id"].strip('"'))
-                tag_id=int(row["tag_id"].strip('"'))
+                game_id = int(row["game_id"].strip('"'))
+                tag_id = int(row["tag_id"].strip('"'))
 
-                exists = await session.scalar(select(GameTag).where(and_(
-                    GameTag.game_id == game_id,
-                    GameTag.tag_id == tag_id
-                    )))
-                if not exists:
-                    game_tag=GameTag(
-                        game_id=game_id,
-                        tag_id=tag_id
+                exists = await session.scalar(
+                    select(GameTag).where(
+                        and_(GameTag.game_id == game_id, GameTag.tag_id == tag_id)
                     )
+                )
+                if not exists:
+                    game_tag = GameTag(game_id=game_id, tag_id=tag_id)
                     game_tags.append(game_tag)
             session.add_all(game_tags)
         await session.commit()
 
-        #---Statistics---
+        # ---Statistics---
         result = await session.execute(select(SiteStatistic))
         if not result.scalars().first():
             statistic = SiteStatistic(
-                total_earned = Decimal("0.00"),
-                total_played = 0,
-                total_earned_today = Decimal("0.00"),
+                total_earned=Decimal("0.00"),
+                total_played=0,
+                total_earned_today=Decimal("0.00"),
             )
             session.add(statistic)
             await session.commit()
 
+
 if __name__ == "__main__":
     asyncio.run(create_init_records())
-                
+
+
 async def delete_records():
     async with async_session_maker as session:
         session.query(GameTag).detele()

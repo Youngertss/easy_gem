@@ -95,7 +95,9 @@ async def get_user_history(
 
 
 @router.post("/create_tag")
-async def create_tag(tag: TagCreate, session: AsyncSession = Depends(get_async_session)) -> TagRead:
+async def create_tag(
+    tag: TagCreate, session: AsyncSession = Depends(get_async_session)
+) -> TagRead:
     result = await db_create_tag(tag, session)
     return result
 
@@ -110,8 +112,9 @@ async def get_tags(session: AsyncSession = Depends(get_async_session)):
 async def get_fortune_wheel_event(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
+    testing: bool = False,
 ):
-    fortune_wheel_event_data = await db_get_fortune_wheel_event(session, user)
+    fortune_wheel_event_data = await db_get_fortune_wheel_event(session, user, testing)
     return fortune_wheel_event_data
 
 
@@ -123,7 +126,7 @@ async def get_safe_hack_event(
     expected_result: Decimal,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
-    testing: bool = False
+    testing: bool = False,
 ):
     safe_hack_event_event_data = await db_get_safe_hack_event(
         sum_bet, chance, coefficient, expected_result, session, user, testing
@@ -137,8 +140,8 @@ async def start_miner_event(
 ):
     if user.balance < sum_bet:
         raise InsufficientBalanceException(
-                user.id, required=sum_bet, current=user.balance
-            )
+            user.id, required=sum_bet, current=user.balance
+        )
     start_miner_evevnt_data = get_start_miner_data(bombs_count)
     return start_miner_evevnt_data
 
@@ -150,9 +153,10 @@ async def finish_miner_event(
     bombs_count: int,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
+    testing: bool = False,
 ):
     # if coefficient = -1 - user lost
     result = await db_finish_miner_event(
-        sum_bet, coefficient, bombs_count, session, user
+        sum_bet, coefficient, bombs_count, session, user, testing
     )
     return result

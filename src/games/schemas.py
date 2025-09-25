@@ -16,10 +16,7 @@ class TagRead(BaseModel):
     id: int
     name: str
 
-    model_config = {
-        "from_attributes": True,
-        "extra": "ignore"
-    }
+    model_config = {"from_attributes": True, "extra": "ignore"}
 
 
 class GameBase(BaseModel):
@@ -38,10 +35,7 @@ class GameRead(GameBase):
     id: int
     tags: list[TagRead]
 
-    model_config = {
-        "from_attributes": True,
-        "extra": "ignore"
-    }
+    model_config = {"from_attributes": True, "extra": "ignore"}
 
 
 class GameCreate(GameBase):

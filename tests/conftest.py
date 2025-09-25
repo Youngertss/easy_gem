@@ -2,15 +2,20 @@ from typing import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_engine, async_sessionmaker, AsyncTransaction
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncSession,
+    AsyncTransaction,
+    async_sessionmaker,
+    create_async_engine,
+)
 
+from src.auth.auth import current_user
+from src.auth.models import User
 from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 from src.database import get_async_session
-from src.auth.models import User
-from src.auth.auth import current_user
 from src.main import app
-
 
 # DB_NAME change on DB_TEST_NAME
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -20,6 +25,7 @@ async_engine = create_async_engine(DATABASE_URL)
 
 pytestmark = pytest.mark.anyio
 # @pytest.mark.anyio - we dont need this more thx to "pytestmark = pytest.mark.anyio"
+
 
 @pytest.fixture(scope="session")
 def anyio_backend():
@@ -79,9 +85,9 @@ async def client(
             bind=connection,
             join_transaction_mode="create_savepoint",
         )
-        user = await async_session.execute(select(User).where(User.id==2))
+        user = await async_session.execute(select(User).where(User.id == 2))
         user = user.scalars().first()
-        return user 
+        return user
 
     app.dependency_overrides[current_user] = override_current_user
     # Here you have to override the dependency that is used in FastAPI's
@@ -95,18 +101,19 @@ async def client(
     await transaction.rollback()
 
 
-#fixture to get user and give it to functions that
-#have dependecies get_current_user
+# fixture to get user and give it to functions that
+# have dependecies get_current_user
 @pytest.fixture
 async def user(session: AsyncSession):
     async def current_user_override():
-        user = await session.execute(select(User).where(User.id==2))
+        user = await session.execute(select(User).where(User.id == 2))
         user = user.scalars().first()
-        return user 
+        return user
 
     app.dependency_overrides[current_user] = current_user_override
     yield user
 
     del app.dependency_overrides[get_async_session]
+
 
 # pytest (-v - visible process of testing) (-s - visible prints)

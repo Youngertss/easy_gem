@@ -15,7 +15,9 @@ from src.games.models import Game, GameHistory, GameTag, SiteStatistic, Tag, Use
 from src.tasks import add_game_history_task
 
 
-async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
+async def db_get_fortune_wheel_event(
+    session: AsyncSession, user: User, testing: bool = False
+):
     try:
         query = select(Game).where(Game.name == "FortuneWheel")
         result = await session.execute(query)
@@ -41,17 +43,18 @@ async def db_get_fortune_wheel_event(session: AsyncSession, user: User):
         stats.total_earned += Decimal(str(income))
         stats.total_earned_today += Decimal(str(income))
         stats.total_played += 1
-
-        # add game to history
-        sum_bet = float(fortune_wheel.data["cost"])
-        income_sum = float(income)
-        extra_data = {}
-        add_game_history_task.delay(
-            "FortuneWheel", user.id, sum_bet, income_sum, extra_data
-        )
+        if not testing:
+            # add game to history
+            sum_bet = float(fortune_wheel.data["cost"])
+            income_sum = float(income)
+            extra_data = {}
+            add_game_history_task.delay(
+                "FortuneWheel", user.id, sum_bet, income_sum, extra_data
+            )
 
         await session.commit()
-        await session.refresh(user)
+        # if not testing:
+        # await session.refresh(user)
 
         return event_res
     except Exception as e:
@@ -68,7 +71,7 @@ async def db_get_safe_hack_event(
     expected_result: Decimal,
     session: AsyncSession,
     user: User,
-    testing: bool = False
+    testing: bool = False,
 ):
     try:
         if user.balance < sum_bet:
@@ -96,11 +99,10 @@ async def db_get_safe_hack_event(
         stats.total_played += 1
 
         await session.commit()
-    
 
         extra_data = {"coefficient": float(coefficient)}
         if not testing:
-        # celery task
+            # celery task
             await session.refresh(user)
             add_game_history_task.delay(
                 "SafeHack", user.id, sum_bet, income_sum, extra_data
@@ -112,14 +114,9 @@ async def db_get_safe_hack_event(
     except SQLAlchemyError as e:
         await session.rollback()
         raise HTTPException(
-            400, detail=f"There is an error SQLALCHEMY while processin safe_hack_event {e}"
+            400,
+            detail=f"There is an error SQLALCHEMY while processin safe_hack_event {e}",
         )
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(
-            400, detail=f"There is an error while processin safe_hack_event {e}"
-        )
-
 
 
 # miner end
@@ -129,13 +126,14 @@ async def db_finish_miner_event(
     bombs_count: int,
     session: AsyncSession,
     user: User,
+    testing: bool = False,
 ):
     try:
         if user.balance < sum_bet:
             raise InsufficientBalanceException(
                 user.id, required=sum_bet, current=user.balance
             )
-        
+
         prize = (sum_bet * coefficient).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
@@ -160,13 +158,14 @@ async def db_finish_miner_event(
         stats.total_played += 1
 
         await session.commit()
-        await session.refresh(user)  # without this line task wouldnt work
+        if not testing:
+            await session.refresh(user)  # without this line task wouldnt work
 
-        # add game to history
-        extra_data = {"coefficient": float(coefficient), "bombs_count": bombs_count}
-        add_game_history_task.delay("Miner", user.id, sum_bet, income, extra_data)
+            # add game to history
+            extra_data = {"coefficient": float(coefficient), "bombs_count": bombs_count}
+            add_game_history_task.delay("Miner", user.id, sum_bet, income, extra_data)
 
         return {"result": "success", "income": float(income)}
-    except Exception as e:
+    except SQLAlchemyError as e:
         await session.rollback()
-        print("error while finishing Miner game", e)
+        print("error SQLAlchemyError while finishing Miner game", e)

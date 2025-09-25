@@ -9,7 +9,14 @@ from sqlalchemy.orm import selectinload
 
 # from src.database import get_async_session
 from src.games.models import Game, GameHistory, GameTag, Tag, User
-from src.games.schemas import GameCreate, GameHistoryCreate, GameHistoryRead, GameRead, TagCreate, TagRead
+from src.games.schemas import (
+    GameCreate,
+    GameHistoryCreate,
+    GameHistoryRead,
+    GameRead,
+    TagCreate,
+    TagRead,
+)
 
 
 async def db_create_game(game_info: GameCreate, session: AsyncSession) -> GameRead:

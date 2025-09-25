@@ -54,14 +54,11 @@ async def balance_exception_middleware(request: Request, call_next):
                 "error": "Insufficient balance",
                 "user_id": exc.user_id,
                 "required": float(exc.required),
-                "current": float(exc.current)
-            }
+                "current": float(exc.current),
+            },
         )
     except Exception as exc:
-        return JSONResponse(
-            status_code=500,
-            content={"error": "Internal server error"}
-        )
+        return JSONResponse(status_code=500, content={"error": "Internal server error"})
 
 
 @app.get("/")
