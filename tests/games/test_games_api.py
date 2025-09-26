@@ -13,9 +13,9 @@ pytestmark = pytest.mark.anyio
 
 async def test_root(client: AsyncClient):
     async with client as ac:
-        response = await ac.get("/")
+        response = await ac.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"message": "it works"}
+    assert response.json() == {"status": "ok"}
 
 
 async def test_get_games_api(client: AsyncClient):

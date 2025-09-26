@@ -116,4 +116,4 @@ async def user(session: AsyncSession):
     del app.dependency_overrides[get_async_session]
 
 
-# pytest (-v - visible process of testing) (-s - visible prints)
+# pytest tests/ (-v - visible process of testing) (-s - visible prints)

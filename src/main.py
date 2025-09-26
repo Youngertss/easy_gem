@@ -1,5 +1,7 @@
+import os
 from contextlib import asynccontextmanager
 
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -23,8 +25,6 @@ from src.utils import InsufficientBalanceException
 
 app = FastAPI()
 
-# statisfiles
-app.mount("/imgs", StaticFiles(directory="src/imgs"), name="imgs")
 
 origins = [
     "http://localhost",
@@ -61,9 +61,21 @@ async def balance_exception_middleware(request: Request, call_next):
         return JSONResponse(status_code=500, content={"error": "Internal server error"})
 
 
-@app.get("/")
-async def initial():
-    return {"message": "it works"}
+@app.middleware("http")
+async def spa_fallback(request, call_next):
+    response = await call_next(request)
+    if response.status_code == 404:
+        path = request.url.path
+        if not path.startswith("/games") and not path.startswith("/imgs"):
+            index_path = os.path.join("frontend", "build", "index.html")
+            if os.path.exists(index_path):
+                return FileResponse(index_path)
+    return response
+
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}
 
 
 @app.get("/celery_test_endpoint")
@@ -96,3 +108,8 @@ app.include_router(additional_users_router)
 app.include_router(statistics_router)
 app.include_router(chat_router)
 app.include_router(games_router)
+
+
+# statisfiles
+app.mount("/imgs", StaticFiles(directory="src/imgs"), name="imgs")
+app.mount("/", StaticFiles(directory="frontend/build", html=True), name="frontend")

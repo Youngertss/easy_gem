@@ -1,9 +1,10 @@
 .env
 __pycache__/
-
+.pytest_cache/
 venv/
 
 # src/games/games_data.txt
+
 celerybeat-schedule
 src/ignore.py
 
