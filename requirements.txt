@@ -272,8 +272,6 @@ pyproject-hooks==1.2.0
     #   pip-tools
 pytest==8.4.1
     # via -r requirements.in
-python==3.12.7
-    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   -r requirements.in
