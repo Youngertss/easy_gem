@@ -25,6 +25,9 @@ from src.utils import InsufficientBalanceException
 
 app = FastAPI()
 
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}
 
 origins = [
     "http://localhost",
@@ -71,11 +74,6 @@ async def spa_fallback(request, call_next):
             if os.path.exists(index_path):
                 return FileResponse(index_path)
     return response
-
-
-@app.get("/api/health")
-async def health():
-    return {"status": "ok"}
 
 
 @app.get("/celery_test_endpoint")
