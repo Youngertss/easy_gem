@@ -18,11 +18,11 @@ Look for frontend on https://github.com/Youngertss/easy_gem_front
 ### Docker
 
 - To run Fastapi app (now still using uvicorn)
-- To run Postgres DB with alembic migrations and seed data (games and tags)
+- To run Postgres DB with alembic migrations and seed data (tags & games, users & gameshistory)
 - To run Redis server
 - To run celery, celery_beat and flower
 
-Now 3 games are available: FortuneWheel, SafeHack, Miner.
+Now 3 games are available: FortuneWheel, SafeHack, Miner - "the most popular" section.
 
 All database models declared in file src/auth/models.py
 
@@ -38,12 +38,11 @@ docker compose up
 
 Don't forget to create .env file in the root with your data. You can see example of it in file environment_example.txt
 
-Now you will have fastapi on 127.0.0.1:8000 and Flower on 127.0.0.1:5555
-
-Frontend is in another repo (it will be 127.0.0.1:3000)
+Now you will have fastapi on 127.0.0.1:8000 (with builded frontend React app) and Flower on 127.0.0.1:5555
 
 
-### If you don't wan't to use a docker, here is instruction.
+
+### If you don't wan't to use docker, here is instruction.
 
 To start the project, first create an environment and download requirements:
 
@@ -61,12 +60,8 @@ backend start:
 uvicorn src.main:app --reload
 ```
 
-frontend start (watch another repo - <https://github.com/Youngertss/easy_gem_front>):
+frontend is stating autmatically with beckend from builded app. If you want to look at not builded front: watch another repo - <https://github.com/Youngertss/easy_gem_front>
 
-```bash
-npm install
-npm start
-```
 
 alembic migrations:
 
@@ -76,7 +71,7 @@ alembic upgrade head
 python -m migrations.seed
 ```
 
-redis start (for chat - you still need this. Delete all services except redis if you want):
+redis start (you still need this for chat. Delete all services except redis if you want):
 
 ```bash
 docker compose up

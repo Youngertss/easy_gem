@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Union
 
@@ -26,7 +26,7 @@ class UserCreate(schemas.BaseUserCreate):
     email: str
     phone_number: str
     password: str
-    created_at: datetime = datetime.utcnow
+    created_at: datetime = datetime.now(timezone.utc)
 
 
 class UserUpdate(schemas.BaseUserUpdate):

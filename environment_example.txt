@@ -2,12 +2,11 @@ it is an example of .env file for starting project:
 
 SECRET = 3AW6t7Z2SizC4yaogE6KiL27S0Hv5ACbAv9BAm1IjV0=
 
-#DB_HOST = localhost - without docker
-DB_HOST = db #- if use docker
+DB_HOST = localhost
 DB_PORT = 5432
 DB_NAME = easygem
 DB_USER = postgres
 DB_PASS = postgres
 
-CELERY_BROKER_URL=redis://redis:6379/0
-CELERY_RESULT_BACKEND=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/1
+CELERY_RESULT_BACKEND=redis://redis:6379/1
