@@ -1,3 +1,4 @@
+import os
 import asyncio
 import json
 from typing import Annotated
@@ -9,7 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.chat.crud import db_get_last_messages, db_save_message
 from src.database import get_async_session
 
+from src.config import REDIS_URL
+
 router = APIRouter(prefix="/ws/chat", tags=["chat"])
+
+
 
 
 @router.websocket("/")
@@ -20,7 +25,7 @@ async def websocket_endpoint(
     await websocket.accept()
 
     # redis channels
-    redis = aioredis.from_url("redis://redis:6379/0")
+    redis = aioredis.from_url(REDIS_URL)
     pubsub = redis.pubsub()
     await pubsub.subscribe("chat_channel")
 
