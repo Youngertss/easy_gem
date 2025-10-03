@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import Depends
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -33,7 +33,7 @@ async def db_get_last_messages(
         statement = (
             select(Message)
             .options(selectinload(Message.user))
-            .order_by(Message.timestamp.desc())
+            .order_by(desc(Message.timestamp))
             .limit(limit)
         )
         result = await session.execute(statement)

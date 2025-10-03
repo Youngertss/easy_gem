@@ -76,6 +76,10 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
         DECIMAL(12, 2), server_default="0.00", default=Decimal("0.00")
     )
 
+    deposit_bonus_multiplier: Mapped[Decimal] = mapped_column(
+        DECIMAL(6,2), server_default="1.00", default=Decimal("1.00")
+    )
+
     total_earned: Mapped[Decimal] = mapped_column(
         DECIMAL(17, 2), server_default="0.00", default=Decimal("0.00")
     )
@@ -98,6 +102,7 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     )
     favorite_game = relationship("Game")
     games_history = relationship("GameHistory", back_populates="user")
+    super_bonuses = relationship("Bonuse")
 
 
 class GameHistory(Base):
@@ -146,6 +151,24 @@ class SiteStatistic(Base):
     total_earned_today: Mapped[Decimal] = mapped_column(
         DECIMAL(15, 2), server_default="0.00", default=Decimal("0.00")
     )
+
+class Bonuse(Base):
+    __tablename__="bonuses"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    bonus_type: Mapped[str] = mapped_column(nullable=False) #money, multiplier
+    value: Mapped[Decimal] = mapped_column(DECIMAL(6,2), nullable=False)
+    is_claimed: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        PG_TIMESTAMP(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        PG_TIMESTAMP(timezone=True), nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+
+    user = relationship("User")
 
 
 # async def create_db_and_tables():
