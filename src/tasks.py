@@ -1,12 +1,13 @@
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
 from sqlalchemy import and_, asc, delete, desc, insert, select
 from sqlalchemy.orm import selectinload
 
-from src.auth.models import Game, GameHistory, Message, SiteStatistic, User
+from src.auth.models import Game, GameHistory, Message, SiteStatistic, User, Bonuse
 from src.celery_app import celery, session_maker
+from src.utils import get_new_bonuse
 
 
 @celery.task(name="test_task")
@@ -135,6 +136,26 @@ def add_game_history_task(game_name, user_id, sum_bet, income_sum, extra_data):
                 extra_data=extra_data,
             )
             session.execute(stmt)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+
+
+
+@celery.task(name="update_bonuses_task")
+def update_bonuses_task():
+    with session_maker() as session:
+        try:
+            for i in range(2): #i=0 - ordinary_bonuse, i=1 - super_bonuse
+                bonuse = session.scalar(select(Bonuse).where(Bonuse.is_super_bonuse == bool(i)))
+                value_type, value = get_new_bonuse(is_super_bonuse=bool(i))
+                bonuse.value_type = value_type
+                bonuse.value = value
+                bonuse.created_at = datetime.now(timezone.utc)
+                bonuse.expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+                session.add(bonuse)
+
             session.commit()
         except Exception as e:
             session.rollback()

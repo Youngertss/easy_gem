@@ -155,8 +155,9 @@ class SiteStatistic(Base):
 class Bonuse(Base):
     __tablename__="bonuses"
     id: Mapped[int] = mapped_column(primary_key=True)
-    bonus_type: Mapped[str] = mapped_column(nullable=False) #money, multiplier
+    bonus_type: Mapped[str] = mapped_column(nullable=False) #money, multiplier (in percentage)
     value: Mapped[Decimal] = mapped_column(DECIMAL(6,2), nullable=False)
+    is_super_bonuse: Mapped[bool] = mapped_column()
     is_claimed: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         PG_TIMESTAMP(timezone=True),

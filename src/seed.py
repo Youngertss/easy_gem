@@ -1,10 +1,10 @@
 import csv
 import json
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
-from src.auth.models import Game, GameTag, Tag, SiteStatistic, User, GameHistory
+from src.auth.models import Game, GameTag, Tag, SiteStatistic, User, GameHistory, Bonuse
 from src.database import async_session_maker
 from sqlalchemy import select, and_
 
@@ -120,6 +120,25 @@ async def create_init_records():
                         extra_data = row.get("extra_data"),
                     ))
             session.add_all(history)
+        await session.commit()
+
+        #-- Initial Bonuses -- 
+        super_bonuse = Bonuse(
+            bonus_type = "money",
+            value = "5",
+            is_claimed = False,
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+        )
+        session.add(super_bonuse)
+
+        ordinary_bonuse = Bonuse(
+            bonus_type = "multiplier",
+            value = "10",
+            is_claimed = False,
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+        )
+        session.add(ordinary_bonuse)
+
         await session.commit()
 
 

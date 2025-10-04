@@ -38,6 +38,11 @@ celery.conf.beat_schedule = {
         "schedule": crontab(minute=0),
         "args": (),
     },
+    "update_bonuses_task": {
+        "task": "update_bonuses_task",
+        "schedule": crontab(minute="*/15"),
+        "args": (),
+    },
 }
 
 celery.autodiscover_tasks(["src.tasks"])
