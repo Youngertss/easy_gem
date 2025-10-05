@@ -13,15 +13,10 @@ from src.auth.schemas import UserCreate, UserRead, UserUpdate
 from src.chat.routers import router as chat_router
 from src.games.routers import router as games_router
 from src.statistics.routers import router as statistics_router
+from src.bonuses.routers import bonuses_router
 from src.tasks import test_task
 from src.utils import InsufficientBalanceException
 
-# from src.auth.models import create_db_and_tables
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     # Not needed if you setup a migration system like Alembic
-#     await create_db_and_tables()
-#     yield
 
 app = FastAPI()
 
@@ -67,7 +62,7 @@ async def balance_exception_middleware(request: Request, call_next):
 @app.middleware("http")
 async def spa_fallback(request, call_next):
     response = await call_next(request)
-    if response.status_code == 404:
+    if response.status_code == 404:     
         path = request.url.path
         if not path.startswith("/games") and not path.startswith("/imgs"):
             index_path = os.path.join("frontend", "build", "index.html")
@@ -106,6 +101,7 @@ app.include_router(additional_users_router)
 app.include_router(statistics_router)
 app.include_router(chat_router)
 app.include_router(games_router)
+app.include_router(bonuses_router)
 
 
 # statisfiles
