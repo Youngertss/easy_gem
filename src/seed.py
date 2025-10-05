@@ -4,9 +4,9 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
-from src.auth.models import Game, GameTag, Tag, SiteStatistic, User, GameHistory, Bonuse
+from src.auth.models import Game, GameTag, Tag, SiteStatistic, User, GameHistory, Bonuse, Message
 from src.database import async_session_maker
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete, text
 
 
 seed_path = "src/seed_data"
@@ -84,7 +84,7 @@ async def create_init_records():
                 exists = await session.scalar(select(User).where(User.username == username))
                 if not exists:
                     users.append(User(
-                        id=int(row["id"].strip('"')),
+                        id = int(row["id"].strip('"')),
                         username=username,
                         email=row["email"].strip('"'),
                         hashed_password=row["hashed_password"].strip('"'),
@@ -94,8 +94,8 @@ async def create_init_records():
                         total_deposit=Decimal(row.get("total_deposit", "0.00")),
                         total_withdrawn=Decimal(row.get("total_withdrawn", "0.00")),
                         total_withdrawals=int(row.get("total_withdrawals", 0)),
-                        created_at=row.get("created_at", datetime.now(timezone.utc)),
-                        favorite_game_id=row.get("favorite_game_id"),
+                        created_at=datetime.fromisoformat(row["created_at"].strip('"')),
+                        favorite_game_id=int(row.get("favorite_game_id")),
                         total_earned=Decimal(row.get("total_earned", "0.00")),
                         total_played=int(row.get("total_played", 0))
                     ))
@@ -115,7 +115,7 @@ async def create_init_records():
                         user_id = int(row.get("user_id")),
                         game_id = int(row.get("game_id")),
                         income = Decimal(row.get("income")),
-                        played_at = row.get("played_at"),
+                        played_at = datetime.fromisoformat(row["played_at"].strip('"')),
                         bet = Decimal(row.get("bet")),
                         extra_data = row.get("extra_data"),
                     ))
@@ -123,32 +123,56 @@ async def create_init_records():
         await session.commit()
 
         #-- Initial Bonuses -- 
-        super_bonuse = Bonuse(
-            bonus_type = "money",
-            value = "5",
-            is_claimed = False,
-            expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
-        )
-        session.add(super_bonuse)
+        bonuse = await session.execute(select(Bonuse))
+        bonuse = bonuse.scalars().first()
+        if not bonuse:
+            now = datetime.now(timezone.utc)
+            super_bonuse = Bonuse(
+                bonus_type = "money",
+                value = Decimal("5"),
+                is_super_bonuse = True,
+                is_claimed = False,
+                created_at=now,
+                expires_at = now + timedelta(minutes=15)
+            )
+            session.add(super_bonuse)
 
-        ordinary_bonuse = Bonuse(
-            bonus_type = "multiplier",
-            value = "10",
-            is_claimed = False,
-            expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
-        )
-        session.add(ordinary_bonuse)
+            ordinary_bonuse = Bonuse(
+                bonus_type = "multiplier",
+                value = Decimal("10"),
+                is_super_bonuse = False,
+                is_claimed = False,
+                created_at=now,
+                expires_at = now + timedelta(minutes=15)
+            )
+            session.add(ordinary_bonuse)
+
+            await session.commit()
+
+
+async def delete_all_records_and_reset_ids():
+    async with async_session_maker() as session:
+        # Удаляем все записи
+        await session.execute(delete(Message))
+        await session.execute(delete(GameHistory))
+        await session.execute(delete(User))
+        await session.execute(delete(GameTag))
+        await session.execute(delete(Game))
+        await session.execute(delete(Tag))
+        await session.execute(delete(Bonuse))
+        await session.execute(delete(SiteStatistic))
+
+        # Restart all squences
+        await session.execute(text("ALTER SEQUENCE messages_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE games_history_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE games_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE tags_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE bonuses_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE site_statistics_id_seq RESTART WITH 1"))
+        await session.execute(text("ALTER SEQUENCE users_id_seq RESTART WITH 1"))
 
         await session.commit()
 
-
 if __name__ == "__main__":
+    # asyncio.run(delete_all_records_and_reset_ids()) #be carefull, it clears all database
     asyncio.run(create_init_records())
-
-
-async def delete_records():
-    async with async_session_maker as session:
-        session.query(GameTag).detele()
-        session.query(Game).detele()
-        session.query(Tag).detele()
-        session.commit()

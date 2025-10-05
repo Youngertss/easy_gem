@@ -102,7 +102,6 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     )
     favorite_game = relationship("Game")
     games_history = relationship("GameHistory", back_populates="user")
-    super_bonuses = relationship("Bonuse")
 
 
 class GameHistory(Base):

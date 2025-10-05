@@ -5,7 +5,6 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.games.schemas import GameCreate, GameRead, TagCreate, TagRead
-from src.main import app
 
 pytestmark = pytest.mark.anyio
 # @pytest.mark.anyio - we dont need this more thx to "pytestmark = pytest.mark.anyio"

@@ -15,14 +15,14 @@ bonuses_router = APIRouter(
 
 @bonuses_router.get("/current")
 async def get_current_bonuses(session: AsyncSession = Depends(get_async_session)):
-    result = db_get_current_bonuses(session)
+    result = await db_get_current_bonuses(session)
     return result
 
-@bonuses_router.patch("/collect_super_bonuse")
+@bonuses_router.patch("/collect_super_bonuse", response_model=dict)
 async def collect_super_bonuse(
     is_super: bool = False,
     session: AsyncSession = Depends(get_async_session), 
     user: User = Depends(current_user)
 ):
-    result = db_collect_super_bonuse(is_super, session, user)
+    result = await db_collect_super_bonuse(is_super, session, user)
     return result

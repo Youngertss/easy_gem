@@ -149,8 +149,8 @@ def update_bonuses_task():
         try:
             for i in range(2): #i=0 - ordinary_bonuse, i=1 - super_bonuse
                 bonuse = session.scalar(select(Bonuse).where(Bonuse.is_super_bonuse == bool(i)))
-                value_type, value = get_new_bonuse(is_super_bonuse=bool(i))
-                bonuse.value_type = value_type
+                bonus_type, value = get_new_bonuse(is_super_bonuse=bool(i))
+                bonuse.bonus_type = bonus_type
                 bonuse.value = value
                 bonuse.created_at = datetime.now(timezone.utc)
                 bonuse.expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
