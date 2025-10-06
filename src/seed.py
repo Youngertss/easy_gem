@@ -110,6 +110,11 @@ async def create_init_records():
                 id = int(row["id"].strip('"'))
                 exists = await session.scalar(select(GameHistory).where(GameHistory.id == id))
                 if not exists:
+                    extra_data = row.get("extra_data")
+                    try:
+                        extra_data = json.loads(extra_data)
+                    except:
+                        extra_data = {}
                     history.append(GameHistory(
                         id=id,
                         user_id = int(row.get("user_id")),
@@ -117,7 +122,7 @@ async def create_init_records():
                         income = Decimal(row.get("income")),
                         played_at = datetime.fromisoformat(row["played_at"].strip('"')),
                         bet = Decimal(row.get("bet")),
-                        extra_data = row.get("extra_data"),
+                        extra_data = extra_data,
                     ))
             session.add_all(history)
         await session.commit()
@@ -153,13 +158,13 @@ async def create_init_records():
 async def delete_all_records_and_reset_ids():
     async with async_session_maker() as session:
         # Удаляем все записи
+        await session.execute(delete(Bonuse))
         await session.execute(delete(Message))
         await session.execute(delete(GameHistory))
         await session.execute(delete(User))
         await session.execute(delete(GameTag))
         await session.execute(delete(Game))
         await session.execute(delete(Tag))
-        await session.execute(delete(Bonuse))
         await session.execute(delete(SiteStatistic))
 
         # Restart all squences
