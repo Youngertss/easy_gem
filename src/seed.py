@@ -154,6 +154,17 @@ async def create_init_records():
 
             await session.commit()
 
+        # -- Right sequences -- 
+        tables = ["users", "games", "tags", "games_history", "messages", "bonuses", "site_statistics"]
+        for t in tables:
+            await session.execute(text(f"""
+                SELECT setval(
+                    pg_get_serial_sequence('{t}', 'id'),
+                    COALESCE((SELECT MAX(id) FROM {t}), 1)
+                );
+            """))
+
+        await session.commit()
 
 async def delete_all_records_and_reset_ids():
     async with async_session_maker() as session:

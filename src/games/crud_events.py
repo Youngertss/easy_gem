@@ -14,6 +14,13 @@ from src.games.game_utils import wheelIncome
 from src.games.models import Game, GameHistory, GameTag, SiteStatistic, Tag, User
 from src.tasks import add_game_history_task
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
 
 async def db_get_fortune_wheel_event(
     session: AsyncSession, user: User, testing: bool = False
@@ -74,6 +81,7 @@ async def db_get_safe_hack_event(
     testing: bool = False,
 ):
     try:
+        logging.info("Safe hack event started")
         if user.balance < sum_bet:
             raise InsufficientBalanceException(
                 user.id, required=sum_bet, current=user.balance
@@ -103,6 +111,7 @@ async def db_get_safe_hack_event(
         extra_data = {"coefficient": float(coefficient)}
         if not testing:
             # celery task
+            logging.info("Safe hack celery giving started")
             await session.refresh(user)
             add_game_history_task.delay(
                 "SafeHack", user.id, sum_bet, income_sum, extra_data

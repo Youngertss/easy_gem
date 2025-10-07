@@ -108,7 +108,7 @@ class GameHistory(Base):
     __tablename__ = "games_history"
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True
-    )  # исправлено с str на int
+    ) 
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     game_id: Mapped[int] = mapped_column(ForeignKey(Game.id), nullable=False)
     bet: Mapped[Decimal] = mapped_column(DECIMAL(12, 2))
