@@ -154,6 +154,8 @@ def update_bonuses_task():
                 bonuse.value = value
                 bonuse.created_at = datetime.now(timezone.utc)
                 bonuse.expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+                bonuse.user_id = None
+                bonuse.is_claimed = False
                 session.add(bonuse)
 
             session.commit()

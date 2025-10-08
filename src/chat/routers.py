@@ -15,8 +15,6 @@ from src.config import REDIS_URL
 router = APIRouter(prefix="/ws/chat", tags=["chat"])
 
 
-
-
 @router.websocket("/")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -36,7 +34,7 @@ async def websocket_endpoint(
     print("Greets to user:", username)
 
     # init message (curr situation in chat)
-    init_mesages = await db_get_last_messages(29, session)  # last 10 msgs
+    init_mesages = await db_get_last_messages(20, session)  # last 20 msgs
     await websocket.send_json({"messages": init_mesages})
 
     async def listen_to_client():
