@@ -151,6 +151,7 @@ class SiteStatistic(Base):
         DECIMAL(15, 2), server_default="0.00", default=Decimal("0.00")
     )
 
+
 class Bonuse(Base):
     __tablename__="bonuses"
     id: Mapped[int] = mapped_column(primary_key=True)

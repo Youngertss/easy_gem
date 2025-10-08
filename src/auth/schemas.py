@@ -13,6 +13,7 @@ class UserRead(schemas.BaseUser[int]):
     photo: str
     balance: Decimal
     total_deposit: Decimal
+    deposit_bonus_multiplier: Decimal
     total_earned: Decimal
     total_played: int
     total_withdrawn: Decimal

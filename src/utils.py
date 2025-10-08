@@ -12,7 +12,12 @@ def get_new_bonuse(is_super_bonuse: bool = False):
     money_values = [0.1, 0.2, 0.25, 0.5, 0.7, 0.8, 1] #in $
     multiplier_values = [2, 3, 5, 10, 15, 20, 30] #2 means +2%, 30 - +30% etc
 
-    bonus_type = random.choice(bonues_type)
+    #only "multiplier"s for ordinary
+    if is_super_bonuse:
+        bonus_type = random.choice(bonues_type)
+    else: 
+        bonus_type = "multiplier"
+
     if bonus_type == "money":
         value = random.choice(money_values)
         if is_super_bonuse:

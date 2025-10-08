@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.models import Bonuse, User
@@ -8,7 +9,7 @@ from src.auth.models import Bonuse, User
 
 async def db_get_current_bonuses(session: AsyncSession):
     try:
-        bonuses = await session.execute(select(Bonuse))
+        bonuses = await session.execute(select(Bonuse).options(selectinload(Bonuse.user)))
         bonuses = bonuses.scalars().all()
         if len(bonuses) != 2:
             raise Exception(f"{len(bonuses)} bonuses exist, not 2")
@@ -20,10 +21,15 @@ async def db_get_current_bonuses(session: AsyncSession):
         return {"response": f"error: {e}"}
 
 
-async def db_collect_super_bonuse(is_super: bool, session: AsyncSession, user: User):
+async def db_collect(is_super: bool, session: AsyncSession, user: User):
     try:
-        bonuse = await session.execute(select(Bonuse).where(Bonuse.is_super_bonuse == is_super))
+        bonuse = await session.execute(
+            select(Bonuse)
+            .where(Bonuse.is_super_bonuse == is_super)
+        )
         bonuse = bonuse.scalars().first()
+        print(bonuse)
+        print(bonuse.is_super_bonuse)
         if bonuse is None:
             return {"response": "bonuse not found"}
         if bonuse.is_claimed:
@@ -36,13 +42,14 @@ async def db_collect_super_bonuse(is_super: bool, session: AsyncSession, user: U
             if user.deposit_bonus_multiplier < new_multiplier:
                 user.deposit_bonus_multiplier = new_multiplier
             else:
-                return {"response":"user's deposit is already equals or higher than this one"}
+                return {"response":"user's deposit_bonuse is already equals or higher than this one"}
 
         if is_super:
             bonuse.user_id = user.id
             bonuse.is_claimed = True
 
         await session.commit()
+        await session.refresh(bonuse)
         return {"response": "ok"}
     except Exception as e:
         await session.rollback()

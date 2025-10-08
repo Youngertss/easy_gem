@@ -186,9 +186,10 @@ async def db_deposit(sum: Decimal, session: AsyncSession, user: User):
             raise HTTPException(
                 400, detail="You can't dep more than 1.000.000 dollar per time"
             )
-
+        sum = sum * user.deposit_bonus_multiplier
         user.balance += sum
         user.total_deposit += sum
+        user.deposit_bonus_multiplier = Decimal("1.00")
         await session.commit()
         await session.refresh(user)
         return {"updated_balance": user.balance}
