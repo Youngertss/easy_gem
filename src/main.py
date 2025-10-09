@@ -16,13 +16,22 @@ from src.statistics.routers import router as statistics_router
 from src.bonuses.routers import bonuses_router
 from src.tasks import test_task
 from src.utils import InsufficientBalanceException
+from src.redis import init_redis, close_redis
 
-
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- startup ---
+    await init_redis()
+    yield
+    # --- shutdown ---
+    await close_redis()
+    
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
 
 origins = [
     "http://localhost",

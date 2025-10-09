@@ -1,5 +1,7 @@
 from decimal import Decimal
 from typing import Optional
+import json
+from src.redis import get_redis
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import and_, desc, insert, select
@@ -21,7 +23,6 @@ from src.games.schemas import (
 
 async def db_create_game(game_info: GameCreate, session: AsyncSession) -> GameRead:
     try:
-
         result = await session.execute(select(Tag).where(Tag.id.in_(game_info.tags)))
         tags = result.scalars().all()
 
@@ -78,6 +79,14 @@ async def db_get_game(
 
 async def db_get_all_games(session: AsyncSession):
     try:
+        redis = get_redis()
+        try:
+            redis_result = await redis.get("games:all")
+            if redis_result:
+                return json.loads(redis_result)
+        except Exception as e:
+            print(f"Redis error: {e}")
+
         tags = await session.execute(select(Tag).options(selectinload(Tag.games)))
         tags = tags.scalars().all()
 
@@ -98,6 +107,8 @@ async def db_get_all_games(session: AsyncSession):
                     tag_games[tag.name] = games
 
         data = {"tags_amount": tags_amount, "tag_games": tag_games}
+        if redis:
+            await redis.set("games:all", json.dumps(data), ex=60*10) #10 mins
 
         return data
     except SQLAlchemyError as e:
