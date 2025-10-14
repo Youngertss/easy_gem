@@ -1,6 +1,8 @@
 <h1>Site for gambling</h1>
 
-Look for frontend on https://github.com/Youngertss/easy_gem_front
+<h3>▶️ Fast overview of my project on youtube (timecods in the description): https://youtu.be/Dh3BF44voCU?si=NhXs9fE4i1gWIBGu</h3>
+
+Look for frontend React App on https://github.com/Youngertss/easy_gem_front
 
 <h2>This project combines in itself such technologies as:</h2>
 
